@@ -8,3 +8,5 @@ main_script.jl: Steady states evaluated. Calls code_new.jl
 transition.jl: Contains objects necessary for transition paths. Assumes main_script.jl is evaluated, and case_final must be set appropriately, for values 1 to 8.
 
 plot.jl: Assumes that transition.jl is evaluated for each case_final values
+
+csv files contain the transition path prices vectors
