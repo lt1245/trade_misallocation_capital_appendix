@@ -9,4 +9,4 @@ transition.jl: Contains objects necessary for transition paths. Assumes main_scr
 
 plot.jl: Assumes that transition.jl is evaluated for each case_final values
 
-csv files contain the transition path prices vectors
+csv files contain the transition path price vectors
