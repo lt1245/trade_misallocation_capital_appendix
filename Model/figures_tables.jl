@@ -1715,12 +1715,12 @@ let
 \\begin{tabular}{lccc}
 \\\\[-1.8ex]\\hline
 \\hline \\\\[-1.8ex]
-Target & Data & \$F_{ex} = 0, FM_{ex} = 1.5\$ & \$F_{ex} = 4.5, FM_{ex} = 0\$ \\\\
+Target & Data & \$F_{ex} = 0, FM_{ex} = 1.5\$ & \$F_{ex} = 4.6, FM_{ex} = 0\$ \\\\
 \\hline \\\\[-1.8ex]
 \\textbf{Financial Development} & & & \\\\[1ex]
-\$\\text{Total Credit to nonfinancials}\$, \$\\%\\text{GDP}\$ & 62 & $(fpct(r[1,3])) & $(fpct(r[1,4])) \\\\
+\$\\text{Total Credit to nonfinancials}\$, \$\\%\\text{GDP}\$ & 61 & $(fpct(r[1,3])) & $(fpct(r[1,4])) \\\\
 Bank lending rate in Germany \$r^*\$ & 5 & $(fpct(r[2,3])) & $(fpct(r[2,4])) \\\\
-\$\\text{Foreign Credit to nonfinancials}\$, \$\\%\\text{Total credit}\$ & 53 & $(fpct(r[3,3])) & $(fpct(r[3,4])) \\\\[1ex]
+\$\\text{Foreign Credit to nonfinancials}\$, \$\\%\\text{Total credit}\$ & 51 & $(fpct(r[3,3])) & $(fpct(r[3,4])) \\\\[1ex]
 \\textbf{Trade} & & & \\\\[1ex]
 Initial \$\\frac{\\text{Import}}{\\text{GDP}}\$ & 21 & $(fpct(r[4,3])) & $(fpct(r[4,4])) \\\\
 Final \$\\frac{\\text{Import}}{\\text{GDP}}\$ & 42 & $(fpct(r[5,3])) & $(fpct(r[5,4])) \\\\[1ex]
@@ -1794,7 +1794,7 @@ let
 \\begin{tabular}{lcccc}
 \\hline
 \\hline \\\\[-1.8ex]
-Description & Data & \$F_{ex} = 0, FM_{ex} = 1.5\$ & \$F_{ex} = 4.5, FM_{ex} = 0\$ & Source \\& Year \\\\
+Description & Data & \$F_{ex} = 0, FM_{ex} = 1.5\$ & \$F_{ex} = 4.6, FM_{ex} = 0\$ & Source \\& Year \\\\
 \\hline \\\\[-1.8ex]
 \\textbf{Production} & & & & \\\\
 Standard deviation of ARPK & $(f2(r[1,1])) & $(f2(r[1,2])) & $(f2(r[1,3])) & Firm level, Hungary \\\\
