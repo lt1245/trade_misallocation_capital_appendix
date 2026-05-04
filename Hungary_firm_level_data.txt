@@ -1,0 +1,67 @@
+======================================================
+ Hungary Firm-Level Moments for Mixed Tables
+ Source: firm_data_appended.dta via empirics_replication.do
+ Julia model moments are indicated separately per table.
+======================================================
+
+TABLE 1: Calibrated parameters and moments
+------------------------------------------------------
+Firm dynamics rows — Data column from firm_appended.dta:
+  f_ex    | Entry rate to exports  | Data =  20.2 % | Model target = 20 %
+           (fraction of all firms that ever enter exports: n_expent/n_all)
+  sigma_z | SD of value added      | Data = 0.82  (from Table23 FE regression)
+  rho_z   | AR(1) of value added   | Data = 0.431 (from Table23 FE regression)
+
+Financial Development and Trade rows: macro data only (BIS, ECB, WB, TiVA).
+Model column (Data and Model): Julia output.
+
+TABLE_regs: Exporting dynamics in model vs. data
+------------------------------------------------------
+Entry cost / Per-period cost columns: Julia model output.
+Data columns (1)-(4): LPM regressions on firm_appended.dta.
+  Dep. var: exportdummy. Regressors: log(VA), lag(export_d), lag(export_share).
+  FEs: year always; industry for specs (1)-(3), not (4). SE clustered by industry.
+
+  Data (1)  N =   408,553  Adj.R2 = 0.26
+    Log value added:   0.0909  ( 0.0083)
+
+  Data (2)  N =   340,429  Adj.R2 = 0.61
+    Log value added:   0.0315  ( 0.0027)
+    Prev export status:  0.6954  ( 0.0075)
+
+  Data (3)  N =   340,429  Adj.R2 = 0.62
+    Log value added:   0.0307  ( 0.0027)
+    Prev export status:  0.6475  ( 0.0064)
+    Prev export share:  0.1896  ( 0.0088)
+
+  Data (4)  N =   340,429  Adj.R2 = 0.61
+    Log value added:   0.0307  ( 0.0026)
+    Prev export status:  0.6823  ( 0.0064)
+    Prev export share:  0.1984  ( 0.0125)
+
+TABLE 5: Impact of trade liberalization on firms
+------------------------------------------------------
+Model columns (None / Trade / Trade & capital): Julia output.
+Data columns (2001, 2008): firm_appended.dta moments below.
+Note: firm counts and capital sizes in the table are normalized so that
+  2001 data = model Trade column (= 100 for capital, 134/75 for firms).
+  Raw capital averages below need that scaling before entering the table.
+  Productivity loss rows: model only, no data counterpart.
+  Distribution of exporters: needs model wealth/productivity thresholds.
+
+  % capital used by exporters       | 2001 =  64.4 | 2008 =  65.3
+  % labor used by exporters         | 2001 =  57.1 | 2008 =  55.9
+  Avg export duration (consec yrs)  | 2001 =  1.78 | 2008 =  4.80
+  SD of ARPK — non-exporters        | 2001 =  1.30 | 2008 =  1.55
+  SD of ARPK — exporters            | 2001 =  1.17 | 2008 =  1.38
+  Export-sales ratio (%)            | 2001 =   6.3 | 2008 =   5.4
+  Extensive margin (% exporters)    | 2001 =  21.9 | 2008 =  20.8
+  Intensive margin (exp/tot sales%) | 2001 =  29.0 | 2008 =  25.9
+  Exporter premium (%)              | 2001 =   204.1 | 2008 =   254.2
+  Starter rate (%)                  | 2001 =   5.6 | 2008 =   5.8
+  Stopper rate (%)                  | 2001 =   4.8 | 2008 =   4.8
+  Avg capital non-exporters (raw)   | 2001 =  103889.0 | 2008 =  114250.0
+  Avg capital exporters (raw)       | 2001 =  670521.0 | 2008 =  985048.0
+  Avg capital all firms (raw)       | 2001 =  228137.0 | 2008 =  254372.0
+
+======================================================
