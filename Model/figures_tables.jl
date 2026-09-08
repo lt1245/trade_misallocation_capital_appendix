@@ -47,6 +47,16 @@ default(fontfamily = "Computer Modern",
         right_margin  = 6Plots.mm,
         top_margin    = 6Plots.mm)
 
+# Create the output directories before anything is written to them. Both are
+# pure output for this script -- Figures is never read at all -- so a checkout
+# of the package need not contain them: git does not track a directory whose
+# contents are untracked, and the first write then fails with
+# "SystemError: opening file ... No such file or directory". Creating them
+# here rather than next to the first use of each keeps the guard ahead of
+# every writer; mkpath is idempotent, so the later calls are harmless.
+mkpath("../Figures")
+mkpath("../Tables")
+
 # Utility functions (copied from plot.jl)
 fpct(x) = string(round(Int, round(100*x, digits=2, RoundNearestTiesAway), RoundNearestTiesAway))
 function movmean(array::Array{Float64,1}, window::Int64)

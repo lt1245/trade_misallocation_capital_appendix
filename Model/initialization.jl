@@ -36,8 +36,11 @@
 # precompile (300 and 299 packages) and load.
 #
 # Because the environment is anchored to this file's own directory via
-# @__DIR__, the package no longer depends on the working directory Julia was
-# launched from.
+# @__DIR__, activating and instantiating it does not depend on the working
+# directory Julia was launched from. Reading and writing data still does: the
+# scripts reach the sibling Data, Tables, Figures and Transition_files folders
+# through relative paths such as "../Figures/Figure1.tikz", so Julia must be
+# started from this Model folder.
 #
 # Idempotent: repeat includes are no-ops, so the cost is paid once per session.
 # =============================================================================
