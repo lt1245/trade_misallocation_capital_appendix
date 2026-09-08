@@ -16,16 +16,26 @@
 #   3. Run this file; it continues from the first flag that equals 0.
 # =============================================================================
 
+# Activate and instantiate the environment shipped with this folder. Must stay
+# above the first `using`, which is where a fresh installation would otherwise
+# fail with "Package JSON ... does not seem to be installed".
+include("initialization.jl")
+
 using Plots
 using StatsBase
 using StatsPlots
-using GeometryTypes
 using GLM
 using Printf
 using XLSX
 
+# Render off-screen. Without this, GR's savefig can fail on a headless machine
+# (a Linux server or container with no display). Harmless on a desktop.
+ENV["GKSwstype"] = "100"
+
 # Use GR backend and point it at the Windows system font directory so that
-# serif fonts (Times New Roman etc.) are available.
+# serif fonts (Times New Roman etc.) are available. On macOS and Linux the
+# "Computer Modern" family requested below falls back to a GR-bundled font,
+# so figures render but their typography differs from the published version.
 gr()
 if Sys.iswindows()
     ENV["GKS_FONT_DIRS"] = "C:/Windows/Fonts"

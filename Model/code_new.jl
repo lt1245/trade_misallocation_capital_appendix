@@ -1,3 +1,8 @@
+# Activate and instantiate the environment shipped with this folder. Must stay
+# above the first `using` and above the addprocs call below. Also covers
+# main_script.jl and search_developed.jl, which both open by including this file.
+include("initialization.jl")
+
 using DelimitedFiles
 using Optim
 using DataFrames
@@ -11,7 +16,10 @@ using SparseArrays, StructArrays
 using BasisMatrices, Arpack
 using LeastSquaresOptim
 using BenchmarkTools #,FiniteDiff
-addprocs(2,exeflags="--project");
+# Pin workers to the project activated in initialization.jl. A bare "--project"
+# would resolve from each worker's working directory instead, which breaks the
+# @everywhere block below once this file is run from outside Model/.
+addprocs(2, exeflags="--project=$(dirname(Base.active_project()))");
 #addprocs(1);
 @everywhere begin
 include("CompEcon.jl")

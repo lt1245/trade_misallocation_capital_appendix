@@ -21,3 +21,18 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
+
+# NOTE: deliberately no [compat] section.
+#
+# The exact package versions are pinned in Manifest.toml, which reproduces the
+# published results on Julia 1.12.5. Adding [compat] bounds changes the
+# recorded project_hash, which makes Pkg print "dependencies or compat
+# requirements have changed ... consider Pkg.resolve()" on every run. Following
+# that advice is harmful here: Pkg.resolve() fails outright (the pinned
+# Qt6Base_jll 6.10.2+1 is no longer listed in the General registry), and even a
+# patch-level Pkg.update() churns 96 packages, including numerics-relevant ones
+# such as StatsFuns, LogExpFunctions and SpecialFunctions.
+#
+# Pkg.instantiate() is unaffected: it installs by tree hash from the package
+# server and reproduces the manifest exactly, including versions the registry
+# no longer lists. The required Julia version is checked in initialization.jl.
