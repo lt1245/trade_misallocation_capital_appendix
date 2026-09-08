@@ -1,7 +1,6 @@
 * ============================================================
-* empirics_replication.do
-* Single replication file for all empirical figures and tables
-* in main.tex, produced in main.tex order.
+* SETUP: packages, paths, directory creation
+* Replication package location: //share_krtk/Kozos/ref_tmcmi
 * ============================================================
 
 * ===== REQUIRED PACKAGES =====
@@ -12,38 +11,86 @@ capture ssc install require, replace
 capture ssc install reghdfe, replace
 capture ssc install eventdd, replace
 
-cd "..\replication_package\Empirics"
-capture mkdir "`c(sysdir_personal)'"
+capture ssc install ftools,replace
+
+/* *===== PASTE OLLEY-PAKES ADO TO PERSONAL ADO PATH =====
+capture confirm file "olleyp.ado"
+
+if _rc {
+    display as error "olleyp.ado not found in `c(pwd)'"
+    exit 601
+}
+
+
 copy "olleyp.ado" "`c(sysdir_personal)'olleyp.ado", replace
+*/
 
-*For appending, this was all that was needed:
 
-// use "/home/adatbank/Adattar/NAV_merleg/2000/apeh_2000.dta",clear
-// append using "/home/adatbank/Adattar/NAV_merleg/2001/apeh_2001.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2002/apeh_2002.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2003/apeh_2003.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2004/apeh_2004.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2005/apeh_2005.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2006/apeh_2006.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2007/apeh_2007.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2008/apeh_2008.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2009/apeh_2009.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2010/apeh_2010.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2011/apeh_2011.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2012/apeh_2012.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2013/apeh_2013.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2014/apeh_2014.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2015/apeh_2015.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2016/apeh_2016.dta"
-// append using "/home/adatbank/Adattar/NAV_merleg/2017/apeh_2017.dta"
+* ===== HELPER: create a directory and all its parents =====
+capture program drop mkdirs
+program define mkdirs
+    args path
+    local path = subinstr(`"`path'"', "\", "/", .)
 
-* I now assume that appending was successful and working with this appended dataset
-use "firm_data_appended.dta"
+    * keep a leading "/" (root) or "//" (UNC share) intact
+    local prefix ""
+    if substr("`path'", 1, 2) == "//" {
+        local prefix "//"
+        local path   = substr("`path'", 3, .)
+    }
+    else if substr("`path'", 1, 1) == "/" {
+        local prefix "/"
+        local path   = substr("`path'", 2, .)
+    }
 
-local figures "..\replication_package\Figures"
-local tables  "..\replication_package\Tables"
+    local sofar "`prefix'"
+    local rest  "`path'"
+    while `"`rest'"' != "" {
+        gettoken piece rest : rest, parse("/")
+        if `"`piece'"' == "/" {
+            local sofar "`sofar'/"
+        }
+        else {
+            local sofar "`sofar'`piece'"
+            capture mkdir "`sofar'"
+        }
+    }
+end
+/*
+* ===== PATHS =====
+* Create the package root, then anchor everything to an ABSOLUTE path so
+* the folder macros keep working after we cd into Empirics.
+mkdirs "../replication_package"
+cd "../replication_package"
+*/
 
-* ===== VARIABLE CONSTRUCTION (Tetenyi_main_v5.do line 45+) =====
+global root     = "/share_krtk/Kozos/ref_tmcmi"
+global empirics "$root/Empirics"
+global figures  "$root/Figures"
+global tables   "$root/Tables"
+
+mkdirs "$empirics"
+mkdirs "$figures"
+mkdirs "$tables"
+
+cd "$empirics"
+
+
+
+* ===== APPENDING THE FIRM PANEL (run once) =====
+global nav "//share_krtk/Adattar/NAV_merleg"
+*
+use "$nav/2000/apeh_2000.dta", clear
+forvalues y = 2001/2017 {
+    append using "$nav/`y'/apeh_`y'.dta"
+}
+save "$empirics/firm_data_appended.dta", replace
+
+*Assuming the append above already ran successfully:
+use "$empirics/firm_data_appended.dta", clear
+
+
+* ===== VARIABLE CONSTRUCTION =====
 gen value_added = ereduzem + kecs + rszem
 replace immat = 0 if immat ==.
 gen capital = targyie + immat
@@ -269,7 +316,7 @@ di distribution_values[14,1] "& " distribution_values[10,1] "& " distribution_va
 di distribution_values[23,1] "& " distribution_values[24,1] "& " distribution_values[21,1] "& " distribution_values[22,1] "& " distribution_values_exit[1,1] "\\ "
 di distribution_values_sum[5,1]  "& " distribution_values_sum[6,1] "& " distribution_values_sum[7,1] "& " distribution_values_sum[8,1] "& " distribution_values_exit[2,1] "& " (distribution_values_total[2,1]+distribution_values_exit[2,1]) "\\ "
 scalar tot2008 = distribution_values_total[2,1]+distribution_values_exit[2,1]
-file open dtfile using "`tables'/Table_data_transition.tex", write replace
+file open dtfile using "$tables/Table_data_transition.tex", write replace
 file write dtfile "\begin{table}" _n
 file write dtfile "\caption{ Transition matrix}" _n
 file write dtfile "    \centering" _n
@@ -300,7 +347,7 @@ di "Exporter w/o foreign owner & " prob_trans_100[3,1] "& "prob_trans_100[3,2] "
 di "Non-exporters w/o foreign owner & " prob_trans_100[4,1] "& "prob_trans_100[4,2] "& " prob_trans_100[4,3] "& " prob_trans_100[4,4] "& " prob_trans_100[4,5] "& " prob_trans_100[4,6] "\\ "
 di "Entrants & " prob_trans_100[5,1] "& "prob_trans_100[5,2] "& " prob_trans_100[5,3] "& " prob_trans_100[5,4] "& " prob_trans_100[5,5] "& " prob_trans_100[5,6] "\\ "
 di "Total in 2008 & " prob_trans_100[6,1] "& "prob_trans_100[6,2] "& " prob_trans_100[6,3] "& " prob_trans_100[6,4] "& " prob_trans_100[6,5] "& " prob_trans_100[6,6] "\\ "
-file open dpfile using "`tables'/Table_data_transition_probability.tex", write replace
+file open dpfile using "$tables/Table_data_transition_probability.tex", write replace
 file write dpfile "\begin{table}" _n
 file write dpfile "\caption{ Transition probability matrix}" _n
 file write dpfile "\label{table:data_transition_probability}" _n
@@ -389,7 +436,7 @@ scalar ex_yy   = distribution_values[1,1]+distribution_values[3,1]+distribution_
 scalar ex_yent = distribution_values[21,1]+distribution_values[23,1]
 scalar ex_exitn = distribution_values[18,1]+distribution_values[20,1]
 scalar ex_exity = distribution_values[17,1]+distribution_values[19,1]
-file open dsfile using "`tables'/Table_data_transition_smaller.tex", write replace
+file open dsfile using "$tables/Table_data_transition_smaller.tex", write replace
 file write dsfile "\begin{table}" _n
 file write dsfile "\caption{ Transition matrix}" _n
 file write dsfile "    \centering" _n
@@ -408,7 +455,7 @@ file write dsfile "\end{table}" _n
 file close dsfile
 
 * --- Table data_regression_simple file export ---
-file open dsrfile using "`tables'/Table_data_regression_simple.tex", write replace
+file open dsrfile using "$tables/Table_data_regression_simple.tex", write replace
 file write dsrfile "\begin{table}" _n
 file write dsrfile "\caption{Capital and leverage growth between 2000 and 2008}" _n
 file write dsrfile "\label{table:data_regression_simple}" _n
@@ -580,7 +627,7 @@ preserve
     drop _firmtag
 
     * Write table
-    file open dmfile using "`tables'/Table_data_micro.tex", write replace
+    file open dmfile using "$tables/Table_data_micro.tex", write replace
     file write dmfile "\begin{table}[ht!]" _n
     file write dmfile "\caption{Descriptive statistics of Hungarian firms between 2000-2008}" _n
     file write dmfile " \scalebox{0.6}{" _n
@@ -638,7 +685,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(capital)")
-graph export "`figures'/DiD_capital_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/DiD_capital_overlap.pdf", as(pdf) name("Graph") replace
 
 local start = 1
 local bin = 1
@@ -660,7 +707,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(value_added)")
-graph export "`figures'/DiD_value_added_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/DiD_value_added_overlap.pdf", as(pdf) name("Graph") replace
 
 su equity if year ==2000 & treated1 == 0
 su equity if year ==2000 & treated1 == 1
@@ -684,7 +731,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(equity)")
-graph export "`figures'/DiD_equity_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/DiD_equity_overlap.pdf", as(pdf) name("Graph") replace
 
 su letszam if year ==2000 & treated1 == 0
 su letszam if year ==2000 & treated1 == 1
@@ -708,7 +755,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(employment)")
-graph export "`figures'/DiD_employment_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/DiD_employment_overlap.pdf", as(pdf) name("Graph") replace
 
 
 * ===================================================================
@@ -719,7 +766,7 @@ graph export "`figures'/DiD_employment_overlap.pdf", as(pdf) name("Graph") repla
 *    DiD_capital_incumbents.eps, DiD_capital_exporters.eps
 *  Table data_regression_did (main.tex Appendix ~line 1105): collect layout
 * ===================================================================
-collect create ex6
+collect create ex6, replace
 preserve
 keep if(flag_incumbent==1)
 collect _r_b _r_se, tag(model[(1)]): eventdd log_capital log_ARPL, timevar(TimeToTreat) ci(rcap) method(hdfe, cluster(sorszam) absorb( no_access_credit_ever alapitas regiokod ind10 year )) graph_op( title("") scheme(s1mono) xlabel(-2 "2000" -1 "2001" 0 "2002" 1 "2003" 2 "2004" 3 "2005" 4 "2006" 5 "2007" 6 "2008") ylabel(-0.1 "-10" 0 "0" 0.1 "10" 0.2 "20"))
@@ -882,13 +929,13 @@ twoway rarea event_incumbent4  event_incumbent2 event_exp_abovemed1, color(gs15)
 || line event_nexp3 event_exp_abovemed1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_incumbents.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_incumbents.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp4  event_exp2 event_exp_abovemed1, color(gs15) ||line event_exp3 event_exp_belowmed1, mc(black) lpattern(dash) lwidth(1.5)  || line event_exp_abovemed3 event_exp_abovemed1, mc(red) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed3 event_exp_abovemed1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_exporters.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_exporters.eps", as(eps) name("Graph") preview(off) replace
 
 * --- Figure DiD_combined (main.tex Section 2, ~line 219) ---
 twoway rarea event_incumbent_ARPL4  event_incumbent_ARPL2 event_incumbent_ARPL1, color(gs15) || line event_incumbent_ARPL3 event_incumbent_ARPL1, mc(black) ms(S) lpattern(dash) lwidth(1.5)  ///
@@ -896,13 +943,13 @@ twoway rarea event_incumbent_ARPL4  event_incumbent_ARPL2 event_incumbent_ARPL1,
 || line event_nexp_ARPL3 event_incumbent_ARPL1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_incumbents_ARPL.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_incumbents_ARPL.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp_ARPL4  event_exp_ARPL2 event_exp_abovemed_ARPL1, color(gs15) ||line event_exp_ARPL3 event_exp_belowmed_ARPL1, mc(black)  lwidth(1.5)  || line event_exp_abovemed_ARPL3 event_exp_abovemed_ARPL1, mc(red) lpattern(dash) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed_ARPL3 event_exp_abovemed_ARPL1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_exporters_ARPL.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_exporters_ARPL.eps", as(eps) name("Graph") preview(off) replace
 
 * --- Table data_regression_did (main.tex Appendix ~line 1105) ---
 collect style cell, nformat(%5.2f)
@@ -910,7 +957,7 @@ collect style cell result[_r_se], sformat("(%s)")
 collect layout (colname#result p_d) (model)
 * Write table using stored scalars and matrices (col3=coef, col2=lo CI, col4=hi CI)
 * SE derived from 95% CI: se = (upper - lower) / 3.92
-file open didfile using "`tables'/Table_data_regression_did.tex", write replace
+file open didfile using "$tables/Table_data_regression_did.tex", write replace
 file write didfile "    \begin{table}" _n
 file write didfile "    \caption{Capital growth difference in difference}" _n
 file write didfile "    \label{table:data_regression_did}" _n
@@ -970,7 +1017,7 @@ bysort sorszam: egen treated3 = max(treated2)
 gen reform_fake = 2005 if treated3==1
 gen TimeToTreat_fake=year-reform_fake
 
-collect create exh6
+collect create exh6, replace
 preserve
 keep if(flag_incumbent==1)
 collect _r_b _r_se, tag(model[(1)]): eventdd log_capital log_ARPL, timevar(TimeToTreat_fake) ci(rcap) method(hdfe, cluster(sorszam) absorb( no_access_credit_ever alapitas regiokod ind10 year )) graph_op( title("") scheme(s1mono) xlabel(-5 "2000" -4 "2001" -3 "2002" -2 "2003" -1 "2004" 0 "2005" 1 "2006" 2 "2007" 3 "2008") ylabel(-0.1 "-10" 0 "0" 0.1 "10" 0.2 "20"))
@@ -1111,20 +1158,20 @@ twoway rarea event_incumbent_ARPL_fake4  event_incumbent_ARPL_fake2 event_incumb
 || line event_nexp_ARPL_fake3 event_incumbent_ARPL_fake1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2004, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_incumbents_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_incumbents_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp_ARPL_fake4  event_exp_ARPL_fake2 event_exp_abovemed_ARPL_fake1, color(gs15) ||line event_exp_ARPL_fake3 event_exp_belowmed_ARPL_fake1, mc(black)  lwidth(1.5)  || line event_exp_abovemed_ARPL_fake3 event_exp_abovemed_ARPL_fake1, mc(red) lpattern(dash) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed_ARPL_fake3 event_exp_abovemed_ARPL_fake1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2004, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_exporters_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_exporters_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
 
 
 * ===================================================================
 * FIGURE DiD_combined_manufacturing (main.tex Appendix ~line 1179)
 * DiD_capital_incumbents_manuf.eps, DiD_capital_incumbents_nomanuf.eps
 * ===================================================================
-collect create exa6
+collect create exa6, replace
 preserve
 keep if(flag_incumbent==1 & ind10 ==3  )
 collect _r_b _r_se, tag(model[(1)]): eventdd log_capital log_ARPL, timevar(TimeToTreat) ci(rcap) method(hdfe, cluster(sorszam) absorb( no_access_credit_ever alapitas regiokod ind10 year )) graph_op( title("") scheme(s1mono) xlabel(-2 "2000" -1 "2001" 0 "2002" 1 "2003" 2 "2004" 3 "2005" 4 "2006" 5 "2007" 6 "2008") ylabel(-0.1 "-10" 0 "0" 0.1 "10" 0.2 "20"))
@@ -1204,14 +1251,14 @@ twoway rarea event_incumbent_manuf4  event_incumbent_manuf2 event_incumbent_manu
 || line event_nexp_manuf3 event_incumbent_manuf1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_incumbents_manuf.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_incumbents_manuf.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea event_incumbent_nomanuf4  event_incumbent_nomanuf2 event_incumbent_nomanuf1, color(gs15) || line event_incumbent_nomanuf3 event_incumbent_nomanuf1, mc(black) ms(S)  lwidth(1.5)  ///
 || line event_exp_nomanuf3 event_incumbent_nomanuf1, mc(red) ms(S) lpattern(dash) lwidth(1.5)    ///
 || line event_nexp_nomanuf3 event_incumbent_nomanuf1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "`figures'/DiD_capital_incumbents_nomanuf.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/DiD_capital_incumbents_nomanuf.eps", as(eps) name("Graph") preview(off) replace
 
 
 * ===================================================================
@@ -1250,7 +1297,7 @@ preserve
     local name3 "Transportation"
     local name4 "Business services"
     local name5 "Public services"
-    file open myfile using "`tables'/Table_industry_shares.tex", write replace
+    file open myfile using "$tables/Table_industry_shares.tex", write replace
     file write myfile "\begin{table}[htbp]" _n
     file write myfile "\centering" _n
     file write myfile "\caption{Industry Shares in 2000 and 2008}" _n
@@ -1310,7 +1357,7 @@ scalar t23_sige    = e(sigma_e)
 scalar t23_r2w     = e(r2_w)
 scalar t23_r2b     = e(r2_b)
 scalar t23_r2o     = e(r2_o)
-file open t23file using "`tables'/Table_Table23.tex", write replace
+file open t23file using "$tables/Table_Table23.tex", write replace
 file write t23file "\begin{table}[h!]" _n
 file write t23file "\caption{Value added regression}" _n
 file write t23file "\centering" _n
@@ -1428,7 +1475,7 @@ scalar op_newborn_nexpdom    = r(newborns)
 scalar op_exit_nexpdom       = r(exiters)
 restore
 
-file open opfile using "`tables'/Table_data_op_decomp.tex", write replace
+file open opfile using "$tables/Table_data_op_decomp.tex", write replace
 file write opfile "\begin{table}[h!]" _n
 file write opfile "\caption{Dynamic Olley-Pakes decomposition for ARPK growth, \% , 2001-2008}" _n
 file write opfile "\label{table:data_op_decomp}" _n
@@ -1587,7 +1634,7 @@ scalar t5_dur_2008 = round(r(mean), 0.01)
 restore
 
 * ===== Write Hungary_firm_level_data.txt =====
-file open hfl using "`tables'/Hungary_firm_level_data.txt", write replace
+file open hfl using "$tables/Hungary_firm_level_data.txt", write replace
 
 file write hfl "======================================================" _n
 file write hfl " Hungary Firm-Level Moments for Mixed Tables" _n
@@ -1651,4 +1698,4 @@ file write hfl "  Avg capital all firms (raw)       | 2001 = " %9.1f (t5_cap_all
 file write hfl "======================================================" _n
 
 file close hfl
-di "Hungary_firm_level_data.txt written to `tables'"
+di "Hungary_firm_level_data.txt written to $tables"
