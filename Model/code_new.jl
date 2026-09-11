@@ -19,8 +19,57 @@ using BenchmarkTools #,FiniteDiff
 # Pin workers to the project activated in initialization.jl. A bare "--project"
 # would resolve from each worker's working directory instead, which breaks the
 # @everywhere block below once this file is run from outside Model/.
-addprocs(2, exeflags="--project=$(dirname(Base.active_project()))");
+#
+# SERIAL MODE FOR DEBUGGING
+# -------------------------
+# Set `run_parallel = false` (or 0) in the REPL before including this file, or
+# start Julia with MODEL_SERIAL=1, to run every country loop on the master.
+# The global wins if both are set.
+#
+#     julia> run_parallel = false
+#     julia> include("figures_tables.jl")
+#
+#     $ MODEL_SERIAL=1 julia --project figures_tables.jl
+#
+# This exists because @distributed ships each loop body to a worker as a
+# closure: an error inside it comes back wrapped in a TaskFailedException with
+# the real stack trace mangled, breakpoints (Debugger.jl, Infiltrator.jl) never
+# fire, println output from workers interleaves, and Revise cannot track the
+# workers, so every edit needs a full restart. Serial mode emits a plain `for`
+# instead, and all of that starts working.
+#
+# Two caveats. Serial mode is slower, at worst by a factor of two, since
+# country_no = 2 and each worker otherwise takes one country. In practice the
+# gap is often far smaller: on Residual_stst at prices_initial it measured 34.7s
+# serial against 32.8s parallel, because BLAS already uses the spare cores. And
+# results can move in the last digits, because the master and the workers pick
+# their own BLAS thread counts and that changes reduction order -- the same
+# class of caveat as the OpenBLAS note in initialization.jl. On that same check
+# the two modes agreed to 7e-10 relative, 6e-13 absolute, but were not bitwise
+# identical. Serial mode is for debugging; the published numbers are produced in
+# parallel mode, which is the default.
+if !isdefined(Main, :run_parallel)
+    run_parallel = get(ENV, "MODEL_SERIAL", "0") != "1"
+end
+# Accept 1/0 as well as true/false: the other run-control flags in this package
+# (case_final, load_solution, asymmetric_liberalization in transition.jl) are
+# integers, so `run_parallel = 0` is the natural thing to reach for. This works
+# because false == 0 and true == 1 in Julia.
+run_parallel = (run_parallel != 0)
+
+run_parallel && addprocs(2, exeflags="--project=$(dirname(Base.active_project()))");
 #addprocs(1);
+
+# Propagate the flag and define @maybe_distributed here, above the @everywhere
+# block below: that block spans the rest of this file and is expanded separately
+# on each process, so both have to exist on the workers before it is sent.
+@everywhere run_parallel = $(run_parallel)
+@everywhere macro maybe_distributed(loop)
+    # Decided while expanding rather than at run time, so that in parallel mode
+    # this emits exactly the `@sync @distributed for ...` that stood here
+    # before and the published code path is left bit-for-bit unchanged.
+    return Main.run_parallel ? esc(:(@sync @distributed $loop)) : esc(loop)
+end
 @everywhere begin
 include("CompEcon.jl")
 using SparseArrays, StructArrays,SharedArrays
@@ -2121,7 +2170,7 @@ function Residual_stst(prices::Array{Float64,1},parameters_tmp::Parameter_type)
     # Initialization of local variables:
     (export_prod,export_price_sum,import_price,domestic_price_sum,
     price_final_actual,NFA,asset_supply,asset_demand,exitflag) = local_var_creator_minimal(country_no);
-    @sync @distributed for country = 1:country_no#@sync @distributed for country = 1:country_no#
+    @maybe_distributed for country = 1:country_no#@sync @distributed for country = 1:country_no#
         (residual[country,1],residual[2* country_no + country,1],exitflag[country,1],export_price_sum[country,1],
         domestic_price_sum[country,1],NFA[country,1],asset_supply[country,1],
         asset_demand[country,1])  = country_residual(country,s_cell,ns_cell,s_fine_cell,ns_fine_cell,
@@ -2239,7 +2288,7 @@ function Residual_stst_detailed(prices::Array{Float64,1},parameters_tmp::Paramet
     sd_leverage_d,sd_leverage_x,sd_leverage,corr_MRPK_lev_d,corr_MRPK_lev_x,corr_MRPK_lev,
     exit_domestic_to_work_sum,exit_exporting_to_work_sum,mean_growth_rev,sd_growth_rev,mean_growth_k,sd_growth_k,
     autocorr_rev,making_losses_exporter,k_opt_d_fine,k_opt_x_fine,V_saved_fine,avg_rev_xx_entrants)= local_var_creator_detailed(country_no,ns_tmp,ns_tmp_fine,size_iid_cost_val);
-    @sync @distributed for country = 1:country_no#
+    @maybe_distributed for country = 1:country_no#
     #for country=1:country_no
         tmp_vector  = country_residual_detailed(country,s_cell,ns_cell,s_fine_cell,ns_fine_cell,
         Phi_z_cell,Phi_z_fine_cell,Phi_cell,Phi_aug_cell,P_kron_cell,P_kron1_cell,

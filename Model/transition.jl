@@ -1746,7 +1746,7 @@ function Residual_transition_sequential(price_trans_actual::Array{Float64,2},cap
     else
         #Enter the loop
         #Backward loop:
-        @sync @distributed for country = 1:country_no #
+        @maybe_distributed for country = 1:country_no #
             # Initialize each country, only once for each
             (exitflag_tmp,s,ns,s_fine,ns_fine,Phi_z,Phi_z_fine,Phi,Phi_aug,
             P_kron,P_kron1,P_kron_fine,z_tilde,z_tilde_fine,income_mat,income_mat_fine,
@@ -1918,7 +1918,7 @@ function Residual_transition_sequential_detailed(price_trans_actual::Array{Float
     else
         #Enter the loop
         #Backward loop:
-        @sync @distributed for country = 1:country_no #
+        @maybe_distributed for country = 1:country_no #
             # Initialize each country, only once for each
             (exitflag_tmp,s,ns,s_fine,ns_fine,Phi_z,Phi_z_fine,Phi,Phi_aug,
             P_kron,P_kron1,P_kron_fine,z_tilde,z_tilde_fine,income_mat,income_mat_fine,
@@ -2513,7 +2513,7 @@ elseif load_solution==2
         delta=1e-7*Matrix(I,length(x),length(x));
         J=convert(SharedArray,zeros(length(x)));
         f_x = f(x);
-        @sync @distributed for i=1:length(x)
+        @maybe_distributed for i=1:length(x)
             tmp =(f(x+delta[:,i])-f_x)/1e-7;
             J[i] = tmp;
         end
