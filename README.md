@@ -142,7 +142,7 @@ All model outputs depend on pre-computed steady-state solutions and transition p
 **To reproduce figures and tables only (fast path):**
 
 ```julia
-include("Model/figures_tables.jl")
+include("figures_tables.jl")
 ```
 
 This reads the pre-computed solutions from `Transition_files/` and generates all model-based figures and tables in `Figures/` and `Tables/`. This is the only file that needs to be run to reproduce the results pertaining to the model; it calls all necessary data files and solutions.
@@ -150,14 +150,14 @@ This reads the pre-computed solutions from `Transition_files/` and generates all
 **To load steady states for only the main text from scratch:**
 
 ```julia
-include("Model/main_script.jl")
+include("main_script.jl")
 ```
 
 **To recompute transition paths from scratch (computationally intensive):**
 
 ```julia
 # In transition.jl, set case_final and load_solution = 0
-include("Model/transition.jl")
+include("transition.jl")
 ```
 
 See comments at the top of `transition.jl` for the list of cases and their correspondence to the scenarios in the paper (some are not utilized in the paper).
@@ -168,16 +168,16 @@ By default the model code calls `addprocs(2)` and splits the two country problem
 
 ```julia
 run_parallel = false            # or 0
-include("Model/figures_tables.jl")
+include("figures_tables.jl")
 ```
 
 Equivalently, from the shell:
 
 ```bash
-MODEL_SERIAL=1 julia --project Model/figures_tables.jl
+MODEL_SERIAL=1 julia --project figures_tables.jl
 ```
 
-The flag is read once, when `Model/code_new.jl` is first included, so switching modes requires a fresh Julia session. If `run_parallel` is already defined in `Main`, it takes precedence over `MODEL_SERIAL`.
+The flag is read once, when `code_new.jl` is first included, so switching modes requires a fresh Julia session. If `run_parallel` is already defined in `Main`, it takes precedence over `MODEL_SERIAL`.
 
 Serial mode is intended for debugging only. It is slower — at worst by a factor of two, since there are two countries — and results can differ in the last digits, because the master process and the workers select their own BLAS thread counts, which changes the order of floating-point reductions. On `Residual_stst` at the initial prices the two modes agreed to 7 × 10⁻¹⁰ relative. The published results are produced in parallel mode, which remains the default.
 
