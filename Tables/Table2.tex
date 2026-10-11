@@ -1,0 +1,27 @@
+\begin{table}[!ht]
+\centering
+\caption{Calibrated parameters and moments}
+\label{table:Table1}
+\scalebox{0.55}{
+\begin{tabular}{lccccc}
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+Parameter & Value & Target & Source \& Year & Data & Model \\
+\hline \\[-1.8ex]
+\textbf{Financial Development} & & & & & \\[1ex]
+ Borrowing tightness, $\theta$ & 0.66 & $\text{Total Credit to nonfinancials}$, $\%\text{GDP}$ & BIS 2008 & 61 & 62 \\
+ Core discount factor, $\beta^*$ & 0.95 & Bank lending rate in Germany $r^*$ & ECB 2008 January & 5 & 5 \\
+ NMS discount factor, $\beta$ & 0.85 & $\text{Foreign Credit to nonfinancials}$, $\%\text{Total credit}$ & BIS 2008 & 51 & 53 \\[1ex]
+\textbf{Trade} & & & & & \\[1ex]
+ Initial import trade cost, $\tau_0$ & 1.53 & Initial $\frac{\text{Import}}{\text{GDP}}$ & WB 1991/TiVA 1995 & 21 & 21 \\
+ Final import trade cost, $\tau_{\infty}$ & 1.35 & Final $\frac{\text{Import}}{\text{GDP}}$ & WB 2008/TiVA 2008 & 42 & 42 \\[1ex]
+\textbf{Firm dynamics} & & & & & \\[1ex]
+ Avg.\ export entry cost, $f_{ex}$ & $460 \%$ & Entry rate to exports & Firm level, Hungary & 20 & 24 \\
+ s.d.\ of LN productivity innovation, $\sigma_{z}$ & 0.05 & s.d.\ value added & Firm level, Hungary & 0.82 & 0.83 \\
+ AR(1) of LN productivity innovation, $\rho_{z}$ & 0.92 & Auto-correlation of value added & Firm level, Hungary & 0.43 & 0.43 \\
+\hline
+\hline
+\end{tabular}
+}
+\parbox{0.9\textwidth}{\caption*{\scriptsize \textit{Note:} Simulated moments of the model matched with moments in the data. Construction of the moments is described in detail in Appendix \ref{appendix:data_sources}. All parameters are calibrated under the assumption that both trade and capital market integration are completed by 2008, except for $\tau_0$, which is calibrated to target the pre-reform economy as closely as possible.}}
+\end{table}
