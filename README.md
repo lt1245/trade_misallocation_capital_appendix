@@ -1,72 +1,90 @@
-# Replication Package
+# Replication Package for *Trade, Misallocation, and Capital Market Integration*
 
-## *Trade, Misallocation, and Capital Market Integration*
-
-**Laszlo Tetenyi** — *Journal of the European Economic Association*
-
----
-
-## Data Availability Statement
-
-The replication materials draw on both restricted administrative microdata and publicly available macroeconomic datasets.
-
-### Restricted data
-
-The firm-level balance sheet data used in the empirical analysis originate from the tax return records of Hungary's National Tax and Customs Administration (NAV, formerly APEH), harmonized by the ELTE KRTK Databank (Center for Economic and Regional Studies, formerly part of the Hungarian Academy of Sciences). Access is governed by data-sharing agreements with the data owner and can be obtained through the ELTE KRTK Databank upon application (<https://adatbank.krtk.elte.hu/>). Researchers wishing to replicate the firm-level empirical results should contact the ELTE KRTK Databank directly regarding access conditions. The restricted data file is not included in this replication package. An exemption for restricted data was granted by the co-editor, and the dataset has been shared with the Data Editor temporarily for replication purposes only.
-
-### Publicly available data
-
-All remaining data used in this paper are publicly accessible. See the [Data Sources](#data-sources) section below for individual citations and access links.
-
-### Replication code
-
-The Julia code required to reproduce all model-based figures and tables is available in the online appendix at <https://github.com/lt1245/trade_misallocation_capital_appendix>. Stata do-files for the empirical analysis are included in this package; their execution requires access to the restricted ELTE KRTK firm-level dataset described above.
+**Laszlo Tetenyi**
+*Journal of the European Economic Association*
 
 ---
 
-## Package Contents
+## 1. Data Availability Statement
+
+The replication materials draw on both restricted administrative microdata and
+publicly available macroeconomic datasets.
+
+**Restricted data.**
+The firm-level balance sheet data used in the empirical analysis originate from
+the tax return records of Hungary's National Tax and Customs Administration
+(NAV, formerly APEH), harmonized by the ELTE KRTK Databank (Center for Economic
+and Regional Studies, formerly part of the Hungarian Academy of Sciences).
+Access is governed by data-sharing agreements with the data owner and can be
+obtained through the ELTE KRTK Databank upon application
+(<https://adatbank.krtk.elte.hu/>). Researchers wishing to replicate the
+firm-level empirical results should contact the ELTE KRTK Databank directly
+regarding access conditions. The restricted data file is not included in this
+replication package. An exemption for restricted data was granted by the
+co-editor, and the dataset has been shared with the Data Editor temporarily for
+replication purposes only.
+
+**Publicly available data.**
+All remaining data used in this paper are publicly accessible. See the
+[Data Sources](#3-data-sources) section below for individual citations and
+access links.
+
+**Replication code.**
+The Julia code required to reproduce all model-based figures and tables is
+available in the online appendix at
+<https://github.com/lt1245/trade_misallocation_capital_appendix>. Stata
+do-files for the empirical analysis are included in this package; their
+execution requires access to the restricted ELTE KRTK firm-level dataset
+described above.
+
+## 2. Package Contents
 
 ```
 replication_package/
-|-- Data/                          # Public datasets (see Data Sources above)
-|   |-- complete_country_panel.dta      # Country-level panel, EU+EFTA, 1990-2008
-|   |-- complete_country_panel_map.dta  # Same, merged with shapefile IDs for spmap
-|   |-- Europe_coord.dta                # European shapefile polygon vertices
-|   |-- Hungary_macrodata.xlsx          # Hungarian aggregate fiscal and macro data
-|   `-- importshare_WB.dta              # Import shares from World Bank WDI
-|-- Empirics/                      # Stata replication code
-|   |-- empirics_replication.do         # Master do-file: all empirical figures/tables
-|   |-- figures_15_18_table13.do        # Choropleth maps and cross-country regression
-|   `-- olleyp.ado                      # Custom Olley-Pakes productivity decomposition
-|-- Figures/                       # All figures in the paper (PDF, EPS, TikZ)
-|-- Model/                         # Julia model code
-|   |-- code_new.jl                     # Core model: household and firm problems
-|   |-- CompEcon.jl                     # Computational economics utilities
-|   |-- initialization.jl               # Activates and instantiates the Julia environment
-|   |-- main_script.jl                  # Solves the four main steady-state equilibria
-|   |-- transition.jl                   # Solves transition path equilibria
-|   |-- figures_tables.jl               # Generates all model-based figures and tables
-|   |-- developed_steady_states.jl      # Steady states for developed-economy comparison
-|   |-- fixed_cost_steady_states.jl     # Steady states for fixed-cost extension
-|   |-- search_developed.jl             # Equilibrium search, developed calibration
-|   |-- Project.toml                    # Julia environment: direct dependencies
-|   |-- Manifest.toml                   # Pinned versions, Julia 1.12 (reference run)
-|   |-- Manifest-v1.11.toml             # Pinned versions, Julia 1.11
-|   `-- Manifest-v1.10.toml             # Pinned versions, Julia 1.10 (LTS)
-|-- Tables/                        # LaTeX table source files (generated by code)
-|-- Transition_files/              # Pre-computed transition price vectors (21 CSVs)
-|-- data_availability.pdf          # Data availability statement
-|-- LICENSE                        # CC BY 4.0 license
-|-- README.md                      # This file
-|-- README.tex                     # LaTeX source of the README
-`-- README.pdf                     # Compiled PDF of the README
+├── Data/                          # Public datasets (see Data Sources above)
+│   ├── complete_country_panel.dta      # Country-level panel, EU+EFTA, 1990-2008
+│   ├── complete_country_panel_map.dta  # Same, merged with shapefile IDs for spmap
+│   ├── Europe_coord.dta                # European shapefile polygon vertices
+│   ├── Hungary_macrodata.xlsx          # Hungarian aggregate fiscal and macro data
+│   └── importshare_WB.dta              # Import shares from World Bank WDI
+├── Empirics/                      # Stata replication code
+│   ├── empirics_replication.do         # Firm-level figures and tables (restricted data)
+│   ├── figures_7_10.do                 # Figures 7-10: choropleth maps, Chinn-Ito index
+│   └── olleyp.ado                      # Custom Olley-Pakes productivity decomposition
+├── Figures/                       # All figures in the paper (PDF, EPS, TikZ), named
+│                                  #   by paper number: Figure5a_consumption.pdf is
+│                                  #   panel (a) of Figure 5 (see Section 6)
+├── Model/                         # Julia model code
+│   ├── code_new.jl                     # Core model: household and firm problems
+│   ├── CompEcon.jl                     # Computational economics utilities
+│   ├── initialization.jl               # Activates and instantiates the Julia environment
+│   ├── main_script.jl                  # Solves the four main steady-state equilibria
+│   ├── transition.jl                   # Solves transition path equilibria
+│   ├── figures_tables.jl               # Generates all model-based figures and tables
+│   ├── developed_steady_states.jl      # Steady states for developed-economy comparison
+│   ├── fixed_cost_steady_states.jl     # Steady states for fixed-cost extension
+│   ├── search_developed.jl             # Equilibrium search, developed calibration
+│   ├── Project.toml                    # Julia environment: direct dependencies
+│   ├── Manifest.toml                   # Pinned versions, Julia 1.12 (reference run)
+│   ├── Manifest-v1.11.toml             # Pinned versions, Julia 1.11
+│   └── Manifest-v1.10.toml             # Pinned versions, Julia 1.10 (LTS)
+├── Tables/                        # All tables in the paper as LaTeX source
+│                                  #   (generated by code): TableN.tex is Table N.
+│                                  #   Also Hungary_firm_level_data.txt, firm-level
+│                                  #   moments passed from Stata to Julia
+├── Transition_files/              # Pre-computed transition price vectors (21 CSVs)
+├── data_availability.pdf          # Data availability statement
+├── LICENSE                        # CC BY 4.0 license
+└── README.pdf                     # This file
 ```
 
-> **Note:** The restricted firm-level dataset is not included in this package. It must be obtained from ELTE KRTK Databank; its location is set in the `global nav` line of `Empirics/empirics_replication.do`. The appended firm panel `firm_data_appended.dta` is built by that do-file and written to `Empirics/`; it is likewise not part of the package.
+> **Note:** The restricted firm-level dataset is not included in this package.
+> It must be obtained from ELTE KRTK Databank; its location is set in the
+> `global nav` line of `Empirics/empirics_replication.do`. The appended firm
+> panel `firm_data_appended.dta` is built by that do-file and written to
+> `Empirics/`; it is likewise not part of the package.
 
----
-
-## Data Sources
+## 3. Data Sources
 
 | Dataset | Use in paper | Access |
 |---|---|---|
@@ -75,19 +93,20 @@ replication_package/
 | World Bank World Integrated Trade Solution (WITS) | Import tariff data | <https://wits.worldbank.org> |
 | Bank for International Settlements — Total Credit Statistics | Credit-to-GDP ratio | <https://www.bis.org/statistics/totcredit.htm> |
 | OECD Trade in Value Added (TiVA) | Export value-added decomposition | <https://www.oecd.org/en/data/datasets/trade-in-value-added.html> |
-| Penn World Table, version 7.1 (Heston, Summers and Aten, 2012) | Calibration: consumption, investment shares | <https://pwt.sas.upenn.edu/> |
-| Penn World Table, version 9.0 (Feenstra, Inklaar and Timmer, 2015) | Cross-country TFP panel (Figures 15–17) | <https://www.rug.nl/ggdc/productivity/pwt/> |
-| Chinn and Ito — Capital account openness index (KAOPEN) | Capital account liberalization dates | <http://web.pdx.edu/~ito/Chinn-Ito_website.htm> |
+| Penn World Table, version 7.1 (Heston et al., 2012) | Calibration: consumption, investment shares | <https://pwt.sas.upenn.edu/> |
+| Penn World Table, version 9.0 (Feenstra et al., 2015) | Cross-country TFP panel (Figures 7–9) | <https://www.rug.nl/ggdc/productivity/pwt/> |
+| Chinn and Ito (2006) — Capital account openness index (KAOPEN) | Capital account liberalization dates | <http://web.pdx.edu/~ito/Chinn-Ito_website.htm> |
 | World Inequality Database (WID) | Income share series | <https://wid.world> |
 | Hungarian State Budget Execution Reports (*Magyar Állami Zárszámadás*) | Import tariff revenues | <https://net.jogtar.hu> |
 
----
+## 4. Software Requirements
 
-## Software Requirements
+### 4.1 Julia (model)
 
-### Julia (model)
-
-**Version:** Julia 1.12.5 produced the published results. Pinned environments for Julia 1.11 and 1.10 (LTS) also ship and have been verified to install and run; on those versions OpenBLAS and other bundled stdlibs differ, which can move the last digits of numerical output.
+**Version:** Julia 1.12.5 produced the published results. Pinned environments
+for Julia 1.11 and 1.10 (LTS) also ship and have been verified to install and
+run; on those versions OpenBLAS and other bundled stdlibs differ, which can move
+the last digits of numerical output.
 
 **Packages:**
 
@@ -97,7 +116,7 @@ replication_package/
 | `Optim` | Numerical optimization |
 | `DataFrames` | Tabular data manipulation |
 | `CSV` | CSV I/O |
-| `SharedArrays`, `Distributed` | Parallel computing (optional; see [Serial mode](#serial-mode-debugging)) |
+| `SharedArrays`, `Distributed` | Parallel computing (optional; see [Serial mode](#53-serial-mode-debugging)) |
 | `LinearAlgebra`, `Statistics` | Standard numerical routines |
 | `SparseArrays`, `StructArrays` | Sparse matrices and structured arrays |
 | `BasisMatrices` | Chebyshev and spline basis functions |
@@ -112,40 +131,155 @@ replication_package/
 | `Printf` | Formatted string output |
 | `XLSX` | Excel file I/O |
 
-The Julia environment is fully specified by `Model/Project.toml` and the accompanying manifest. No manual setup is required: every entry point includes `Model/initialization.jl`, which activates the environment and instantiates it on first use. Julia selects `Manifest-v1.11.toml` or `Manifest-v1.10.toml` automatically when running under those versions, and `Manifest.toml` (Julia 1.12.5) otherwise; the three pin the same package versions and differ only in the stdlibs and bundled binaries that Julia itself ships.
+The Julia environment is fully specified by `Model/Project.toml` and the
+accompanying manifest. No manual setup is required: every entry point includes
+`Model/initialization.jl`, which activates the environment and instantiates it
+on first use. Julia selects `Manifest-v1.11.toml` or `Manifest-v1.10.toml`
+automatically when running under those versions, and `Manifest.toml`
+(Julia 1.12.5) otherwise; the three pin the same package versions and differ
+only in the stdlibs and bundled binaries that Julia itself ships.
 
-### Stata (empirics)
+### 4.2 Stata (empirics)
 
 - **Version:** Stata 18
-- **User-written packages** (installed automatically by `empirics_replication.do`): `matsort`, `gtools`, `egenmore`, `require`, `reghdfe`, `eventdd`, `ftools`
-- **User-written packages** (installed automatically by `figures_15_18_table13.do`): `spmap`, `estout`
-- **Custom ado:** `olleyp.ado` (included in `Empirics/`). Nothing is installed into the personal ado directory: the master do-file changes the working directory to `$empirics` before calling `olleyp`, so Stata finds the command on its ado-path provided the file sits in that folder. This ado-file implements the Olley–Pakes productivity growth decomposition and was written by Leitão (2022), who distributes it as `olleyp_program.ado`; it is renamed to `olleyp.ado` here so that the file name matches the command name. It is redistributed under the MIT License, with the original copyright notice retained in the file header.
+- **User-written packages** (installed automatically by
+  `empirics_replication.do`): `matsort`, `gtools`, `egenmore`, `require`,
+  `reghdfe`, `eventdd`, `ftools`
+- **User-written packages** (installed automatically by `figures_7_10.do`):
+  `spmap`
+- **Custom ado:** `olleyp.ado` (included in `Empirics/`). Nothing is installed
+  into the personal ado directory: the master do-file changes the working
+  directory to `$empirics` before calling `olleyp`, so Stata finds the command
+  on its ado-path provided the file sits in that folder. This ado-file
+  implements the Olley–Pakes productivity growth decomposition and was written
+  by Leitão (2022), who distributes it as `olleyp_program.ado`; it is renamed to
+  `olleyp.ado` here so that the file name matches the command name. It is
+  redistributed under the MIT License, with the original copyright notice
+  retained in the file header.
 
----
+### 4.3 LaTeX (Figure 1 and the tables)
 
-## Replication Instructions
+The tables are written as LaTeX source (`Tables/TableN.tex`), and Figure 1 is
+written as pgfplots code (`Figures/Figure1.tikz`) rather than as an image, so
+they have to be compiled with LaTeX to be viewed. All other figures are PDF or
+EPS files.
 
-### Step 1 — Empirical analysis (Stata)
+- **Distribution:** any TeX distribution that includes the packages below,
+  e.g. a full TeX Live installation (2018 or later) or MiKTeX (which can install
+  missing packages on the fly).
+- **Engine:** pdfLaTeX. The EPS figures (Figures 2 and 7–14) are converted to
+  PDF on the fly by `epstopdf`, which calls Ghostscript; both ship with TeX Live
+  and MiKTeX.
 
-1. Obtain access to `NAV_merleg` from the ELTE KRTK Databank and note the location of the yearly files `apeh_<year>.dta`, which are stored one folder per year.
-2. Open `empirics_replication.do` and set the two paths at the top of the file. No other path needs editing.
-   - `global root` (line 67): the package root. The do-file creates `Empirics/`, `Figures/` and `Tables/` beneath it if they do not exist, and then changes the working directory to `$root/Empirics`.
-   - `global nav` (line 81): the folder holding the yearly NAV files.
-3. Copy `olleyp.ado` into `$root/Empirics`. This is the working directory from which the do-file runs, so Stata resolves the `olleyp` command from there.
-4. Run `empirics_replication.do`. It first appends the yearly NAV files for 2000–2017 and saves the panel as `$root/Empirics/firm_data_appended.dta`. Once that file exists, the append can be skipped on subsequent runs by commenting out lines 83–87. The do-file then produces all empirical figures (Figures 1–14) and tables in the `Figures/` and `Tables/` directories. It also creates a txt file `Tables/Hungary_firm_level_data.txt` that is used as an input for `Model/figures_tables.jl` to create tables containing mixed empirical and model variables.
-5. Outside the restricted data, on your own computer: run `Empirics/figures_15_18_table13.do`. Update the data and output paths at the top of the file if needed. This produces Figures 15–18 and Table 13 using only public data from the `Data/` folder.
+| Package | Needed for |
+|---|---|
+| `tikz` | Figure 1: `Figure1.tikz` is a `tikzpicture` |
+| `pgfplots` | Figure 1: `axis` environments and `\addplot`; the paper sets `\pgfplotsset{compat=newest}` |
+| `pgfplotstable` | Figure 1: `\pgfplotstableread` holds the three data series inside the file |
+| `tikzscale` | Figure 1, when it is included with `\includegraphics` as in the paper; scales the plot to the requested width and height |
+| `graphicx` | All PDF and EPS figures (`\includegraphics`); `\scalebox` in every table |
+| `epstopdf` | EPS figures (Figures 2 and 7–14) under pdfLaTeX |
+| `caption` | `\caption*`, which sets the notes under tables and figures |
+| `booktabs` | `\toprule`, `\midrule`, `\bottomrule`, `\cmidrule` (Tables 4, 12 and 21) |
+| `multirow` | `\multirow` (Tables 6 and 19) |
+| `amsmath` | `\text` in math mode (Tables 2, 5, 15, 16, 18, 20, 21, 23 and 24) |
+| `subfigure` | Arranging the panels of multi-panel figures as in the paper (`\subfigure[...]{...}`); not needed to compile a single panel |
 
-### Step 2 — Model computation (Julia)
+Tables 3, 4 and 6 contain `\cite` commands, and several notes contain `\ref` to
+sections of the paper. Compiled on their own, outside the manuscript, these
+print as `?` and `??`.
 
-All model outputs depend on pre-computed steady-state solutions and transition price vectors. The `Transition_files/` folder contains pre-computed transition paths so that `figures_tables.jl` can be run without solving for the full transition. Solving for the transition path requires at least 16 GB RAM, preferably 32 GB RAM. The code starts two worker processes, so at least 4 CPU cores are assumed; parallel execution can be switched off for debugging (see [Serial mode](#serial-mode-debugging) below).
+**Minimal example.** Saved in the package root and compiled with pdfLaTeX, the
+following file draws Figure 1 with the same `\includegraphics` call and
+pgfplots settings as the paper, followed by Table 1. Any other table or figure
+can be added the same way.
+
+```latex
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{pgfplots, pgfplotstable}   % pgfplots also loads tikz
+\usepackage{tikzscale}
+% pgfplots settings of the paper's preamble; they also apply to Figure 1
+\pgfplotsset{yticklabel style={text width=4em,align=right}}
+\pgfplotsset{try min ticks=2}
+\pgfplotsset{compat=newest}
+\pgfplotsset{every axis/.append style={label style={font=\tiny},
+             tick label style={font=\tiny}}, width=0.2\textwidth}
+\begin{document}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.65\textwidth,height=0.35\textwidth]{Figures/Figure1.tikz}
+\end{figure}
+\input{Tables/Table1.tex}
+\end{document}
+```
+
+Without `tikzscale`, `\input{Figures/Figure1.tikz}` in place of the
+`\includegraphics` line draws the figure at the size set in the file (full text
+width, 9 cm high).
+
+## 5. Replication Instructions
+
+### 5.1 Step 1 — Empirical analysis (Stata)
+
+1. Obtain access to `NAV_merleg` from the ELTE KRTK Databank and note the
+   location of the yearly files `apeh_<year>.dta`, which are stored one folder
+   per year.
+2. Open `empirics_replication.do` and set the two paths at the top of the file.
+   No other path needs editing.
+   - `global root` (line 88): the package root. The do-file creates
+     `Empirics/`, `Figures/` and `Tables/` beneath it if they do not exist, and
+     then changes the working directory to `$root/Empirics`.
+   - `global nav` (line 102): the folder holding the yearly NAV files.
+3. Copy `olleyp.ado` into `$root/Empirics`. This is the working directory from
+   which the do-file runs, so Stata resolves the `olleyp` command from there.
+4. Run `empirics_replication.do`. It first appends the yearly NAV files for
+   2000–2017 and saves the panel as `$root/Empirics/firm_data_appended.dta`.
+   Once that file exists, the append can be skipped on subsequent runs by
+   commenting out lines 104–108. The do-file then produces the firm-level
+   figures (Figures 2 and 11–14) and tables (Tables 1 and 7–14) in the
+   `Figures/` and `Tables/` directories, under the names listed in
+   [Section 6](#6-mapping-of-code-outputs-to-the-paper). It also creates a txt
+   file `Tables/Hungary_firm_level_data.txt` that is used as an input for
+   `Model/figures_tables.jl` to create the tables containing mixed empirical and
+   model variables (Tables 2, 4 and 6).
+5. Outside the restricted data, on your own computer: run
+   `Empirics/figures_7_10.do`. Update the data and output paths at the top of
+   the file if needed. This produces Figures 7–10 using only public data from
+   the `Data/` folder.
+
+### 5.2 Step 2 — Model computation (Julia)
+
+All model outputs depend on pre-computed steady-state solutions and transition
+price vectors. The `Transition_files/` folder contains pre-computed transition
+paths so that `figures_tables.jl` can be run without solving for the full
+transition. Solving for the transition path requires at least 16 GB RAM,
+preferably 32 GB RAM. The code starts two worker processes, so at least 4 CPU
+cores are assumed; parallel execution can be switched off for debugging (see
+[Serial mode](#53-serial-mode-debugging) below).
 
 **To reproduce figures and tables only (fast path):**
 
 ```julia
+cd(".../Model")
 include("figures_tables.jl")
 ```
 
-This reads the pre-computed solutions from `Transition_files/` and generates all model-based figures and tables in `Figures/` and `Tables/`. This is the only file that needs to be run to reproduce the results pertaining to the model; it calls all necessary data files and solutions.
+This reads the pre-computed solutions from `Transition_files/` and generates all
+model-based figures and tables in `Figures/` and `Tables/`: Figures 3–6 and
+15–21, and Tables 2–6 and 15–25. It also writes Figure 1, which is built from
+`Data/Hungary_macrodata.xlsx`. This is the only file that needs to be run to
+reproduce the results pertaining to the model; it calls all necessary data files
+and solutions. A copy of `Tables/Hungary_firm_level_data.txt` from Step 1 ships
+with the package, so this step does not require the restricted data. The scripts
+set Julia's working directory to `Model/` when they start, so they can be run
+from any directory, for example from an editor whose REPL opens in the package
+root.
 
 **To load steady states for only the main text from scratch:**
 
@@ -160,11 +294,18 @@ include("main_script.jl")
 include("transition.jl")
 ```
 
-See comments at the top of `transition.jl` for the list of cases and their correspondence to the scenarios in the paper (some are not utilized in the paper).
+See comments at the top of `transition.jl` for the list of cases and their
+correspondence to the scenarios in the paper (some are not utilized in the
+paper).
 
-### Serial mode (debugging)
+### 5.3 Serial mode (debugging)
 
-By default the model code calls `addprocs(2)` and splits the two country problems across worker processes. Because `@distributed` sends each loop body to a worker as a closure, an error inside it comes back wrapped in a `TaskFailedException` with the stack trace mangled, breakpoints never fire, and `Revise` cannot track the workers. To run everything in a single process instead, set the flag before including any model file:
+By default the model code calls `addprocs(2)` and splits the two country
+problems across worker processes. Because `@distributed` sends each loop body to
+a worker as a closure, an error inside it comes back wrapped in a
+`TaskFailedException` with the stack trace mangled, breakpoints never fire, and
+`Revise` cannot track the workers. To run everything in a single process
+instead, set the flag before including any model file:
 
 ```julia
 run_parallel = false            # or 0
@@ -173,54 +314,198 @@ include("figures_tables.jl")
 
 Equivalently, from the shell:
 
-```bash
+```sh
 MODEL_SERIAL=1 julia --project figures_tables.jl
 ```
 
-The flag is read once, when `code_new.jl` is first included, so switching modes requires a fresh Julia session. If `run_parallel` is already defined in `Main`, it takes precedence over `MODEL_SERIAL`.
+The flag is read once, when `Model/code_new.jl` is first included, so switching
+modes requires a fresh Julia session. If `run_parallel` is already defined in
+`Main`, it takes precedence over `MODEL_SERIAL`.
 
-Serial mode is intended for debugging only. It is slower — at worst by a factor of two, since there are two countries — and results can differ in the last digits, because the master process and the workers select their own BLAS thread counts, which changes the order of floating-point reductions. On `Residual_stst` at the initial prices the two modes agreed to 7 × 10⁻¹⁰ relative. The published results are produced in parallel mode, which remains the default.
+Serial mode is intended for debugging only. It is slower — at worst by a factor
+of two, since there are two countries — and results can differ in the last
+digits, because the master process and the workers select their own BLAS thread
+counts, which changes the order of floating-point reductions. On
+`Residual_stst` at the initial prices the two modes agreed to 7 × 10⁻¹⁰
+relative. The published results are produced in parallel mode, which remains
+the default.
 
-### Step 3 — Compile the paper
+## 6. Mapping of Code Outputs to the Paper
 
-The paper manuscript is not included in this replication package. After running Steps 1 and 2, all figures and tables referenced via `\input{Tables/...}` and `\includegraphics{Figures/...}` will be present in the `Tables/` and `Figures/` directories and ready for inclusion in the manuscript.
+Every table and every figure panel in the paper is listed below with the file
+that holds it and the code that writes it. Numbers follow the manuscript:
+Tables 1–6 and Figures 1–6 are in the main text, the others in the appendix.
+Output files are named after these numbers:
 
----
+- `Tables/TableN.tex` is Table N.
+- `Figures/FigureN.ext` is Figure N when the figure has a single panel.
+- `Figures/FigureN<letter>_<title>.ext` is panel (`<letter>`) of Figure N;
+  `<title>` is the panel's title in the paper.
+- The panels of Figures 15 and 16 carry no letter in the paper; their files are
+  named after their row and column labels (for example,
+  `Figure16_workers_closedCM.pdf` is the "Workers" row, "Closed CM" column of
+  Figure 16).
 
-## Expected Running Times
+Six panels appear in two figures of the paper. The code saves each of them once
+and copies it to the second name, so every figure in the paper has its own
+files.
 
-Times were measured on an Intel Core Ultra 7 265U (12 cores, 32 GB RAM) running Windows 11 Enterprise 64-bit.
+### 6.1 Tables
+
+| Table | Caption in the paper | File in `Tables/` | Produced by |
+|---:|---|---|---|
+| 1 | Descriptive statistics of Hungarian firms between 2000-2008 | `Table1.tex` | `empirics_replication.do` |
+| 2 | Calibrated parameters and moments | `Table2.tex` | `figures_tables.jl`<sup>a</sup> |
+| 3 | Preassigned parameters | `Table3.tex` | `figures_tables.jl` |
+| 4 | Exporting dynamics in the model vs. data | `Table4.tex` | `figures_tables.jl`<sup>a</sup> |
+| 5 | Trade liberalization under closed and integrated capital markets | `Table5.tex` | `figures_tables.jl` |
+| 6 | Impact of trade liberalization on firms | `Table6.tex` | `figures_tables.jl`<sup>a</sup> |
+| 7 | Transition matrix [by ownership and export status jointly] | `Table7.tex` | `empirics_replication.do` |
+| 8 | Transition probability matrix | `Table8.tex` | `empirics_replication.do` |
+| 9 | Transition matrix [ownership and export status separately] | `Table9.tex` | `empirics_replication.do` |
+| 10 | Capital and leverage growth between 2000 and 2008 | `Table10.tex` | `empirics_replication.do` |
+| 11 | Capital growth difference in difference | `Table11.tex` | `empirics_replication.do` |
+| 12 | Industry Shares in 2000 and 2008 | `Table12.tex` | `empirics_replication.do` |
+| 13 | Value added regression | `Table13.tex` | `empirics_replication.do` |
+| 14 | Dynamic Olley-Pakes decomposition for ARPK growth, %, 2001-2008 | `Table14.tex` | `empirics_replication.do` |
+| 15 | Capital market integration starting from trade-open economy | `Table15.tex` | `figures_tables.jl` |
+| 16 | The calibration without entry cost but with fixed cost compared to baseline | `Table16.tex` | `figures_tables.jl` |
+| 17 | Moments of without entry cost but with fixed cost compared to baseline | `Table17.tex` | `figures_tables.jl` |
+| 18 | Comparing the impact of reforms [per-period fixed cost; aggregates] | `Table18.tex` | `figures_tables.jl` |
+| 19 | Comparing the impact of reforms [per-period fixed cost; firms] | `Table19.tex` | `figures_tables.jl` |
+| 20 | Standalone capital market integration | `Table20.tex` | `figures_tables.jl` |
+| 21 | Majority voting on capital market reforms | `Table21.tex` | `figures_tables.jl` |
+| 22 | Welfare change following external reforms | `Table22.tex` | `figures_tables.jl` |
+| 23 | Financial development and external reforms | `Table23.tex` | `figures_tables.jl` |
+| 24 | Effect of reforms on the Core economy | `Table24.tex` | `figures_tables.jl` |
+| 25 | Comparing welfare gains following a symmetric vs asymmetric trade liberalization | `Table25.tex` | `figures_tables.jl` |
+
+<sup>a</sup> Combines model output with the firm-level moments that
+`empirics_replication.do` writes to `Tables/Hungary_firm_level_data.txt`; a copy
+of that file ships with the package.
+
+### 6.2 Figures
+
+| Fig. | Panel | Caption / panel title in the paper | File in `Figures/` | Produced by |
+|---:|---|---|---|---|
+| 1 | – | **Evolution of Hungary's foreign credit, imports, and tariffs** | `Figure1.tikz` | `figures_tables.jl` |
+| 2 | (a) | **Capital growth of incumbent firms**: Incumbent firms | `Figure2a_incumbent_firms.eps` | `empirics_replication.do` |
+| 2 | (b) | Always exporting firms | `Figure2b_always_exporting_firms.eps` | `empirics_replication.do` |
+| 3 | (a) | **Exporter's decision depends on productivity and net worth**: Capital choice: k(a,z)/k<sup>opt</sup>(z) | `Figure3a_capital_choice.pdf` | `figures_tables.jl` |
+| 3 | (b) | Export status decision | `Figure3b_export_status_decision.pdf` | `figures_tables.jl` |
+| 4 | (a) | **Exporters' decision change with capital market integration**: % change in capital | `Figure4a_change_in_capital.pdf` | `figures_tables.jl` |
+| 4 | (b) | % change in profits | `Figure4b_change_in_profits.pdf` | `figures_tables.jl` |
+| 4 | (c) | Exit decision | `Figure4c_exit_decision.pdf` | `figures_tables.jl` |
+| 5 | (a) | **Transition dynamics after trade liberalization**: Consumption | `Figure5a_consumption.pdf` | `figures_tables.jl` |
+| 5 | (b) | TFP | `Figure5b_TFP.pdf` | `figures_tables.jl` |
+| 5 | (c) | Capital | `Figure5c_capital.pdf` | `figures_tables.jl` |
+| 5 | (d) | Exporters | `Figure5d_exporters.pdf` | `figures_tables.jl` |
+| 5 | (e) | Non-exporters | `Figure5e_nonexporters.pdf` | `figures_tables.jl` |
+| 5 | (f) | Share of exporter firms | `Figure5f_share_of_exporter_firms.pdf` | `figures_tables.jl` |
+| 5 | (g) | Capital per exporters | `Figure5g_capital_per_exporter.pdf` | `figures_tables.jl` |
+| 5 | (h) | Capital per non-exporters | `Figure5h_capital_per_nonexporter.pdf` | `figures_tables.jl` |
+| 5 | (i) | Capital share of exporters | `Figure5i_capital_share_of_exporters.pdf` | `figures_tables.jl` |
+| 5 | (j) | s.d. ARPK | `Figure5j_sd_ARPK.pdf` | `figures_tables.jl` |
+| 5 | (k) | Non-exporter s.d. ARPK | `Figure5k_nonexporter_sd_ARPK.pdf` | `figures_tables.jl` |
+| 5 | (l) | Exporter s.d. ARPK | `Figure5l_exporter_sd_ARPK.pdf` | `figures_tables.jl` |
+| 6 | (a) | **Change in the capital of export incumbents after capital market integration**: Adjusted to trade liberalization | `Figure6a_adjusted_to_trade_liberalization.pdf` | `figures_tables.jl` |
+| 6 | (b) | 10 years after trade liberalization | `Figure6b_10_years_after_trade_liberalization.pdf` | `figures_tables.jl` |
+| 7 | – | **Changes in Import/GDP between 1992 and 2008** | `Figure7.eps` | `figures_7_10.do` |
+| 8 | – | **Changes in TFP between 1992 and 2008** | `Figure8.eps` | `figures_7_10.do` |
+| 9 | – | **Financial development (Domestic Credit/GDP) in 1992** | `Figure9.eps` | `figures_7_10.do` |
+| 10 | – | **Capital Market Integration Measures** | `Figure10.eps` | `figures_7_10.do` |
+| 11 | (a) | **Overlap assumption for treated vs. controls firms in 2000**: Capital | `Figure11a_capital.pdf` | `empirics_replication.do` |
+| 11 | (b) | Value added | `Figure11b_value_added.pdf` | `empirics_replication.do` |
+| 11 | (c) | Equity | `Figure11c_equity.pdf` | `empirics_replication.do` |
+| 11 | (d) | Employment | `Figure11d_employment.pdf` | `empirics_replication.do` |
+| 12 | (a) | **Placebo reform of 2004: Capital growth of incumbent firms**: Incumbent firms | `Figure12a_incumbent_firms_placebo.eps` | `empirics_replication.do` |
+| 12 | (b) | Always exporting firms | `Figure12b_always_exporting_firms_placebo.eps` | `empirics_replication.do` |
+| 13 | (a) | **Capital growth of incumbent firms — no labor productivity as control**: Incumbent firms | `Figure13a_incumbent_firms_noARPL.eps` | `empirics_replication.do` |
+| 13 | (b) | Always exporting firms | `Figure13b_always_exporting_firms_noARPL.eps` | `empirics_replication.do` |
+| 14 | (a) | **Capital growth of manufacturing vs. all other incumbent firms**: Manufacturing incumbents | `Figure14a_manufacturing_incumbents.eps` | `empirics_replication.do` |
+| 14 | (b) | All other incumbents | `Figure14b_other_incumbents.eps` | `empirics_replication.do` |
+| 15 | top left | **Changes in capital, exporting profits, and exit decisions**: Capital, integrated CM | `Figure15_capital_integratedCM.pdf` | `figures_tables.jl` |
+| 15 | top middle | Profits, integrated CM | `Figure15_profits_integratedCM.pdf` | `figures_tables.jl` |
+| 15 | top right | Exit decision, integrated CM | `Figure15_exit_integratedCM.pdf` | `figures_tables.jl` |
+| 15 | bottom left | Capital, closed CM | `Figure15_capital_closedCM.pdf` | `figures_tables.jl` |
+| 15 | bottom middle | Profits, closed CM | `Figure15_profits_closedCM.pdf` | `figures_tables.jl` |
+| 15 | bottom right | Exit decision, closed CM | `Figure15_exit_closedCM.pdf` | `figures_tables.jl` |
+| 16 | top left | **Consumption equivalent welfare changes**: Exporters, integrated CM | `Figure16_exporters_integratedCM.pdf` | `figures_tables.jl` |
+| 16 | top middle | Exporters, closed CM | `Figure16_exporters_closedCM.pdf` | `figures_tables.jl` |
+| 16 | top right | Exporters, integrated vs. closed | `Figure16_exporters_integrated_vs_closed.pdf` | `figures_tables.jl` |
+| 16 | bottom left | Workers, integrated CM | `Figure16_workers_integratedCM.pdf` | `figures_tables.jl` |
+| 16 | bottom middle | Workers, closed CM | `Figure16_workers_closedCM.pdf` | `figures_tables.jl` |
+| 16 | bottom right | Workers, integrated vs. closed | `Figure16_workers_integrated_vs_closed.pdf` | `figures_tables.jl` |
+| 17 | (a) | **Transition dynamics after trade liberalization**: Top 10% wealth share | `Figure17a_top10_wealth_share.pdf` | `figures_tables.jl` |
+| 17 | (b) | Top 10% income share | `Figure17b_top10_income_share.pdf` | `figures_tables.jl` |
+| 17 | (c) | Top 10% cons. share | `Figure17c_top10_consumption_share.pdf` | `figures_tables.jl` |
+| 18 | (a) | **Transition dynamics of consumption following trade liberalization**: Symmetric trade liberalization (same panel as Figure 5(a); copied) | `Figure18a_consumption_symmetric.pdf` | `figures_tables.jl` |
+| 18 | (b) | Asymmetric trade liberalization | `Figure18b_consumption_asymmetric.pdf` | `figures_tables.jl` |
+| 19 | (a) | **Transition dynamics of TFP following trade liberalization**: Symmetric trade liberalization (same panel as Figure 5(b); copied) | `Figure19a_TFP_symmetric.pdf` | `figures_tables.jl` |
+| 19 | (b) | Asymmetric trade liberalization | `Figure19b_TFP_asymmetric.pdf` | `figures_tables.jl` |
+| 20 | (a) | **Transition dynamics of s.d. ARPK following trade liberalization**: Symmetric trade liberalization (same panel as Figure 5(j); copied) | `Figure20a_sd_ARPK_symmetric.pdf` | `figures_tables.jl` |
+| 20 | (b) | Asymmetric trade liberalization | `Figure20b_sd_ARPK_asymmetric.pdf` | `figures_tables.jl` |
+| 21 | (a) | **Transition dynamics following asymmetric trade liberalization**: Consumption (same panel as Figure 18(b); copied) | `Figure21a_consumption.pdf` | `figures_tables.jl` |
+| 21 | (b) | TFP (same panel as Figure 19(b); copied) | `Figure21b_TFP.pdf` | `figures_tables.jl` |
+| 21 | (c) | Capital | `Figure21c_capital.pdf` | `figures_tables.jl` |
+| 21 | (d) | Exporters | `Figure21d_exporters.pdf` | `figures_tables.jl` |
+| 21 | (e) | Non-exporters | `Figure21e_nonexporters.pdf` | `figures_tables.jl` |
+| 21 | (f) | Share of exporter firms | `Figure21f_share_of_exporter_firms.pdf` | `figures_tables.jl` |
+| 21 | (g) | Capital per exporters | `Figure21g_capital_per_exporter.pdf` | `figures_tables.jl` |
+| 21 | (h) | Capital per non-exporters | `Figure21h_capital_per_nonexporter.pdf` | `figures_tables.jl` |
+| 21 | (i) | Capital share of exporters | `Figure21i_capital_share_of_exporters.pdf` | `figures_tables.jl` |
+| 21 | (j) | s.d. ARPK (same panel as Figure 20(b); copied) | `Figure21j_sd_ARPK.pdf` | `figures_tables.jl` |
+| 21 | (k) | Non-exporter s.d. ARPK | `Figure21k_nonexporter_sd_ARPK.pdf` | `figures_tables.jl` |
+| 21 | (l) | Exporter s.d. ARPK | `Figure21l_exporter_sd_ARPK.pdf` | `figures_tables.jl` |
+
+## 7. Expected Running Times
+
+Times were measured on an Intel Core Ultra 7 265U (12 cores, 32 GB RAM) running
+Windows 11 Enterprise 64-bit.
 
 | Task | Approximate time (minutes) |
 |---|---:|
 | `empirics_replication.do` (with restricted data, excluding the one-off append of the yearly NAV files) | 4 |
-| `figures_15_18_table13.do` | 2 |
+| `figures_7_10.do` | 2 |
 | `figures_tables.jl` (from pre-computed files) | 30 |
 | `main_script.jl` (steady states only) | 5 |
 | `transition.jl` (full transition, all cases) | 15 |
 
----
+## 8. License
 
-## License
+The replication materials in this package — code, data, and generated tables —
+are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+See the `LICENSE` file for details.
 
-The replication materials in this package — code, data, and generated tables — are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See the `LICENSE` file for details.
+One exception applies: `Empirics/olleyp.ado` is third-party code by
+Leitão (2022), redistributed under the terms of the MIT License. Its copyright
+notice and license text are retained with the file.
 
-One exception applies: `Empirics/olleyp.ado` is third-party code by Leitão (2022), redistributed under the terms of the MIT License. Its copyright notice and license text are retained with the file.
+The paper manuscript is not included in this package and remains subject to the
+copyright terms of the *Journal of the European Economic Association*.
 
-The paper manuscript is not included in this package and remains subject to the copyright terms of the *Journal of the European Economic Association*.
+## 9. Notes
 
----
-
-## Notes
-
-- The `Transition_files/` CSV files store equilibrium price vectors for the transition paths. Their filenames encode the scenario (e.g., `vec_price_clCM.csv` = closed capital markets).
-- All LaTeX table files in `Tables/` are generated programmatically by the replication code; do not edit them by hand.
-
----
+- The `Transition_files/` CSV files store equilibrium price vectors for the
+  transition paths. Their filenames encode the scenario (e.g.,
+  `vec_price_clCM.csv` = closed capital markets).
+- All LaTeX table files in `Tables/` are generated programmatically by the
+  replication code; do not edit them by hand.
+- Each figure and table section of the code states, in its header comment, the
+  paper number and the output file it writes.
 
 ## References
 
-- Chinn, M. D. and H. Ito. Capital account openness index (KAOPEN). <http://web.pdx.edu/~ito/Chinn-Ito_website.htm>
-- Feenstra, R. C., R. Inklaar and M. P. Timmer (2015). The Next Generation of the Penn World Table. *American Economic Review*.
-- Heston, A., R. Summers and B. Aten (2012). Penn World Table, version 7.1.
-- Leitão (2022). `olleyp_program.ado` — Olley–Pakes productivity growth decomposition for Stata.
+- Chinn, Menzie D., and Hiro Ito. 2006. "What Matters for Financial
+  Development? Capital Controls, Institutions, and Interactions." *Journal of
+  Development Economics* 81 (1): 163–192.
+  <https://ideas.repec.org/a/eee/deveco/v81y2006i1p163-192.html>
+- Feenstra, Robert C., Robert Inklaar, and Marcel P. Timmer. 2015. "The Next
+  Generation of the Penn World Table." *American Economic Review* 105 (10):
+  3150–3182. <https://doi.org/10.1257/aer.20130954>
+- Heston, Alan, Robert Summers, and Bettina Aten. 2012. "Penn World Table
+  Version 7.1." Dataset, Center for International Comparisons of Production,
+  Income and Prices, University of Pennsylvania. <https://pwt.sas.upenn.edu/>
+- Leitão, Martim. 2022. "olleyp: Olley–Pakes Productivity Growth Decomposition
+  for Stata." Stata ado-file, GitHub repository. Version dated 11 June 2022. MIT
+  License. Accessed 13 August 2026. <https://github.com/martimleitao97/olleyp>
