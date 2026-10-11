@@ -1,4 +1,25 @@
 * ============================================================
+* empirics_replication.do
+*
+* OUTPUTS -- file names follow the figure/table numbers of the paper
+* (the README maps every output file to the paper):
+*   Tables/Table1.tex    Table 1   Descriptive statistics of Hungarian firms
+*   Tables/Table7.tex    Table 7   Transition matrix
+*   Tables/Table8.tex    Table 8   Transition probability matrix
+*   Tables/Table9.tex    Table 9   Transition matrix (ownership, export status)
+*   Tables/Table10.tex   Table 10  Capital and leverage growth, 2000-2008
+*   Tables/Table11.tex   Table 11  Capital growth difference in difference
+*   Tables/Table12.tex   Table 12  Industry shares in 2000 and 2008
+*   Tables/Table13.tex   Table 13  Value added regression
+*   Tables/Table14.tex   Table 14  Dynamic Olley-Pakes decomposition for ARPK
+*   Figures/Figure2a_*.eps, Figure2b_*.eps        Figure 2   Capital growth (DiD)
+*   Figures/Figure11a_*.pdf ... Figure11d_*.pdf   Figure 11  Overlap, 2000
+*   Figures/Figure12a_*.eps, Figure12b_*.eps      Figure 12  Placebo reform of 2004
+*   Figures/Figure13a_*.eps, Figure13b_*.eps      Figure 13  No log(ARPL) control
+*   Figures/Figure14a_*.eps, Figure14b_*.eps      Figure 14  Manufacturing vs. other
+*   Tables/Hungary_firm_level_data.txt  firm-level moments that
+*       Model/figures_tables.jl reads for the data columns of Tables 2, 4 and 6
+*
 * SETUP: packages, paths, directory creation
 * Replication package location: //share_krtk/Kozos/ref_tmcmi
 * ============================================================
@@ -218,9 +239,9 @@ drop if(flag_2006==1 & flag_2008==1 & (flag_2007<1))
 
 
 * ===================================================================
-* TABLE data_transition + TABLE data_regression_simple
-* (main.tex Appendix lines ~990-1008 and ~1051-1077)
-* Values printed below are copy-pasted into the hardcoded tables in main.tex
+* PAPER TABLES 7-10: transition matrices and simple capital and leverage
+* growth regressions (Tables/Table7.tex ... Tables/Table10.tex).
+* Values are also printed to the log.
 * ===================================================================
 preserve
 scalar final_year = 2008
@@ -307,8 +328,8 @@ tabulate tabulatable_dummy_sum, matcell(distribution_values_sum)
 tabulate tabulatable_dummy_exit, matcell(distribution_values_exit)
 tabulate tabulatable_dummy_total, matcell(distribution_values_total)
 
-* --- Table data_transition (main.tex ~line 990) ---
-di "=== TABLE data_transition rows ==="
+* --- Paper Table 7 (main.tex \label{table:data_transition}) ---
+di "=== Paper Table 7: transition matrix rows ==="
 di distribution_values[3,1] "& " distribution_values[7,1] "& " distribution_values[11,1] "& " distribution_values[15,1] "& " distribution_values[19,1] "& " distribution_values_sum[1,1] "\\ "
 di distribution_values[8,1] "& " distribution_values[4,1] "& " distribution_values[16,1] "& " distribution_values[12,1] "& " distribution_values[20,1] "& " distribution_values_sum[2,1] "\\ "
 di distribution_values[9,1] "& " distribution_values[13,1] "& " distribution_values[1,1] "& " distribution_values[5,1] "& " distribution_values[17,1] "& "  distribution_values_sum[3,1] "\\ "
@@ -316,7 +337,7 @@ di distribution_values[14,1] "& " distribution_values[10,1] "& " distribution_va
 di distribution_values[23,1] "& " distribution_values[24,1] "& " distribution_values[21,1] "& " distribution_values[22,1] "& " distribution_values_exit[1,1] "\\ "
 di distribution_values_sum[5,1]  "& " distribution_values_sum[6,1] "& " distribution_values_sum[7,1] "& " distribution_values_sum[8,1] "& " distribution_values_exit[2,1] "& " (distribution_values_total[2,1]+distribution_values_exit[2,1]) "\\ "
 scalar tot2008 = distribution_values_total[2,1]+distribution_values_exit[2,1]
-file open dtfile using "$tables/Table_data_transition.tex", write replace
+file open dtfile using "$tables/Table7.tex", write replace
 file write dtfile "\begin{table}" _n
 file write dtfile "\caption{ Transition matrix}" _n
 file write dtfile "    \centering" _n
@@ -335,8 +356,8 @@ file write dtfile "        \label{table:data_transition}" _n
 file write dtfile "    \end{table}" _n
 file close dtfile
 
-* --- Table data_transition_probability (main.tex ~line 995) ---
-di "=== TABLE data_transition_probability rows ==="
+* --- Paper Table 8 (main.tex \label{table:data_transition_probability}) ---
+di "=== Paper Table 8: transition probability matrix rows ==="
 matrix prob_trans = (distribution_values[3,1]/distribution_values_sum[1,1],distribution_values[7,1]/distribution_values_sum[1,1],distribution_values[11,1]/distribution_values_sum[1,1],distribution_values[15,1]/distribution_values_sum[1,1],distribution_values[19,1]/distribution_values_sum[1,1], distribution_values_sum[1,1]/(distribution_values_total[2,1]+distribution_values_exit[2,1]) \ distribution_values[8,1]/distribution_values_sum[2,1],distribution_values[4,1]/distribution_values_sum[2,1],distribution_values[16,1]/distribution_values_sum[2,1],distribution_values[12,1]/distribution_values_sum[2,1],distribution_values[20,1]/distribution_values_sum[2,1],distribution_values_sum[2,1]/(distribution_values_total[2,1]+distribution_values_exit[2,1]) \ distribution_values[9,1]/distribution_values_sum[3,1],distribution_values[13,1]/distribution_values_sum[3,1],distribution_values[1,1]/distribution_values_sum[3,1],distribution_values[5,1]/distribution_values_sum[3,1],distribution_values[17,1]/distribution_values_sum[3,1],distribution_values_sum[3,1]/(distribution_values_total[2,1]+distribution_values_exit[2,1]) \ distribution_values[14,1]/distribution_values_sum[4,1],distribution_values[10,1]/distribution_values_sum[4,1],distribution_values[6,1]/distribution_values_sum[4,1],distribution_values[2,1]/distribution_values_sum[4,1],distribution_values[18,1]/distribution_values_sum[4,1],distribution_values_sum[4,1]/(distribution_values_total[2,1]+distribution_values_exit[2,1]) \ distribution_values[23,1]/distribution_values_exit[1,1] ,distribution_values[24,1]/distribution_values_exit[1,1] ,distribution_values[21,1]/distribution_values_exit[1,1] ,distribution_values[22,1]/distribution_values_exit[1,1] ,0,distribution_values_exit[1,1] /(distribution_values_total[2,1]+distribution_values_exit[2,1]) \  distribution_values_sum[5,1]/ (distribution_values_total[2,1]+distribution_values_exit[2,1]) ,distribution_values_sum[6,1]/ (distribution_values_total[2,1]+distribution_values_exit[2,1]) ,distribution_values_sum[7,1]/ (distribution_values_total[2,1]+distribution_values_exit[2,1]) ,distribution_values_sum[8,1]/ (distribution_values_total[2,1]+distribution_values_exit[2,1]) ,distribution_values_exit[2,1]/ (distribution_values_total[2,1]+distribution_values_exit[2,1]),1 )
 matrix prob_trans_100 = 100 * prob_trans
 mata : Mrounded=round(st_matrix("prob_trans_100"),1.0)
@@ -347,7 +368,7 @@ di "Exporter w/o foreign owner & " prob_trans_100[3,1] "& "prob_trans_100[3,2] "
 di "Non-exporters w/o foreign owner & " prob_trans_100[4,1] "& "prob_trans_100[4,2] "& " prob_trans_100[4,3] "& " prob_trans_100[4,4] "& " prob_trans_100[4,5] "& " prob_trans_100[4,6] "\\ "
 di "Entrants & " prob_trans_100[5,1] "& "prob_trans_100[5,2] "& " prob_trans_100[5,3] "& " prob_trans_100[5,4] "& " prob_trans_100[5,5] "& " prob_trans_100[5,6] "\\ "
 di "Total in 2008 & " prob_trans_100[6,1] "& "prob_trans_100[6,2] "& " prob_trans_100[6,3] "& " prob_trans_100[6,4] "& " prob_trans_100[6,5] "& " prob_trans_100[6,6] "\\ "
-file open dpfile using "$tables/Table_data_transition_probability.tex", write replace
+file open dpfile using "$tables/Table8.tex", write replace
 file write dpfile "\begin{table}" _n
 file write dpfile "\caption{ Transition probability matrix}" _n
 file write dpfile "\label{table:data_transition_probability}" _n
@@ -366,8 +387,9 @@ file write dpfile "        \end{tabular}}\caption*{\scriptsize \textit{Note:} Th
 file write dpfile "    \end{table}" _n
 file close dpfile
 
-* --- Table data_regression_simple (main.tex ~line 1051) ---
-di "=== TABLE data_regression_simple rows ==="
+* --- Paper Table 10 (main.tex \label{table:data_regression_simple}): regressions;
+*     the file Tables/Table10.tex is written further below ---
+di "=== Paper Table 10: capital and leverage growth rows ==="
 reg capital_growth no_access_for_credit
 mata : Mrounded=round(st_matrix("e(b)"),0.0001)
 mata : st_matrix("coeff_simple_reg",Mrounded)
@@ -418,8 +440,8 @@ di "$\Delta \frac{Debt}{Asset} $&  " lev_expdom "&" lev_nexpdom "&" lev_expfor "
 di "s.e.&  (" lev_expdom_se ")&(" lev_nexpdom_se ")&(" lev_expfor_se ")&(" lev_nexpfor_se ")\\"
 restore
 
-* --- Table data_transition_smaller (main.tex ~line 1023) ---
-di "=== TABLE data_transition_smaller ==="
+* --- Paper Table 9 (main.tex \label{table:data_transition_smaller}) ---
+di "=== Paper Table 9: transition matrix, ownership and export status ==="
 scalar fo_ww   = distribution_values[1,1]+distribution_values[2,1]+distribution_values[5,1]+distribution_values[6,1]
 scalar fo_wfw  = distribution_values[11,1]+distribution_values[12,1]+distribution_values[15,1]+distribution_values[16,1]
 scalar fo_went = distribution_values[21,1]+distribution_values[22,1]
@@ -436,7 +458,7 @@ scalar ex_yy   = distribution_values[1,1]+distribution_values[3,1]+distribution_
 scalar ex_yent = distribution_values[21,1]+distribution_values[23,1]
 scalar ex_exitn = distribution_values[18,1]+distribution_values[20,1]
 scalar ex_exity = distribution_values[17,1]+distribution_values[19,1]
-file open dsfile using "$tables/Table_data_transition_smaller.tex", write replace
+file open dsfile using "$tables/Table9.tex", write replace
 file write dsfile "\begin{table}" _n
 file write dsfile "\caption{ Transition matrix}" _n
 file write dsfile "    \centering" _n
@@ -454,8 +476,8 @@ file write dsfile "    \label{table:data_transition_smaller}" _n
 file write dsfile "\end{table}" _n
 file close dsfile
 
-* --- Table data_regression_simple file export ---
-file open dsrfile using "$tables/Table_data_regression_simple.tex", write replace
+* --- Paper Table 10: file export ---
+file open dsrfile using "$tables/Table10.tex", write replace
 file write dsrfile "\begin{table}" _n
 file write dsrfile "\caption{Capital and leverage growth between 2000 and 2008}" _n
 file write dsrfile "\label{table:data_regression_simple}" _n
@@ -548,11 +570,11 @@ bysort sorszam: egen median_equity_2000a_export1 = max(median_equity_2000_export
 
 
 * ===================================================================
-* TABLE data_micro (main.tex ~line 182)
+* PAPER TABLE 1 (main.tex \label{table:data_micro})
 * Descriptive statistics of Hungarian firms 2000-2008
-* Exports to Tables/Table_data_micro.tex
+* Exports to Tables/Table1.tex
 * ===================================================================
-di "=== TABLE data_micro: Descriptive statistics ==="
+di "=== Paper Table 1: Descriptive statistics ==="
 preserve
     gen value_added_m = value_added/1000
     gen capital_m     = capital/1000
@@ -627,7 +649,7 @@ preserve
     drop _firmtag
 
     * Write table
-    file open dmfile using "$tables/Table_data_micro.tex", write replace
+    file open dmfile using "$tables/Table1.tex", write replace
     file write dmfile "\begin{table}[ht!]" _n
     file write dmfile "\caption{Descriptive statistics of Hungarian firms between 2000-2008}" _n
     file write dmfile " \scalebox{0.6}{" _n
@@ -659,9 +681,9 @@ preserve
 restore
 
 * ===================================================================
-* FIGURE overlap (main.tex Appendix ~line 1027)
-* DiD_capital_overlap.pdf, DiD_value_added_overlap.pdf,
-* DiD_equity_overlap.pdf, DiD_employment_overlap.pdf
+* PAPER FIGURE 11 (main.tex \label{fig:overlap})
+* (a) Figure11a_capital.pdf, (b) Figure11b_value_added.pdf,
+* (c) Figure11c_equity.pdf,  (d) Figure11d_employment.pdf
 * ===================================================================
 su log_capital if year ==2000 & treated1 == 0
 su log_capital if year ==2000 & treated1 == 1
@@ -685,7 +707,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(capital)")
-graph export "$figures/DiD_capital_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/Figure11a_capital.pdf", as(pdf) name("Graph") replace
 
 local start = 1
 local bin = 1
@@ -707,7 +729,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(value_added)")
-graph export "$figures/DiD_value_added_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/Figure11b_value_added.pdf", as(pdf) name("Graph") replace
 
 su equity if year ==2000 & treated1 == 0
 su equity if year ==2000 & treated1 == 1
@@ -731,7 +753,7 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(equity)")
-graph export "$figures/DiD_equity_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/Figure11c_equity.pdf", as(pdf) name("Graph") replace
 
 su letszam if year ==2000 & treated1 == 0
 su letszam if year ==2000 & treated1 == 1
@@ -755,16 +777,16 @@ forval j = 1/`nlevels' {
     local call `call' || function normalden(x, mu`j', sd`j') , `range' lcolor(`color')
 }
 twoway `call'  xla(`normal_begin'(1)`normal_end')  legend(order(3 "Treated" 1 "Control") pos(12))  ytitle(Density) xtitle("log(employment)")
-graph export "$figures/DiD_employment_overlap.pdf", as(pdf) name("Graph") replace
+graph export "$figures/Figure11d_employment.pdf", as(pdf) name("Graph") replace
 
 
 * ===================================================================
 * DiD REGRESSIONS — produces:
-*  Figure DiD_combined (main.tex Section 2, ~line 219):
-*    DiD_capital_incumbents_ARPL.eps, DiD_capital_exporters_ARPL.eps
-*  Figure DiD_combined_noARPL (main.tex Appendix ~line 1097):
-*    DiD_capital_incumbents.eps, DiD_capital_exporters.eps
-*  Table data_regression_did (main.tex Appendix ~line 1105): collect layout
+*  Paper Figure 2 (main.tex \label{fig:DiD_combined}):
+*    (a) Figure2a_incumbent_firms.eps, (b) Figure2b_always_exporting_firms.eps
+*  Paper Figure 13 (main.tex \label{fig:DiD_combined_noARPL}):
+*    (a) Figure13a_incumbent_firms_noARPL.eps, (b) Figure13b_always_exporting_firms_noARPL.eps
+*  Paper Table 11 (main.tex \label{table:data_regression_did}): Tables/Table11.tex
 * ===================================================================
 collect create ex6, replace
 preserve
@@ -923,41 +945,41 @@ replace event_incumbent_ARPL1 = 2008.0 in 9
 sort event_exp_abovemed1
 graph set window fontface "Times New Roman"
 
-* --- Figure DiD_combined_noARPL (main.tex Appendix ~line 1097) ---
+* --- Paper Figure 13 (a) and (b): without log(ARPL) as control ---
 twoway rarea event_incumbent4  event_incumbent2 event_exp_abovemed1, color(gs15) || line event_incumbent3 event_exp_abovemed1, mc(black) ms(S)  lwidth(1.5)  ///
 || line event_exp3 event_exp_belowmed1, mc(red) ms(S) lpattern(dash) lwidth(1.5)    ///
 || line event_nexp3 event_exp_abovemed1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_incumbents.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure13a_incumbent_firms_noARPL.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp4  event_exp2 event_exp_abovemed1, color(gs15) ||line event_exp3 event_exp_belowmed1, mc(black) lpattern(dash) lwidth(1.5)  || line event_exp_abovemed3 event_exp_abovemed1, mc(red) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed3 event_exp_abovemed1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_exporters.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure13b_always_exporting_firms_noARPL.eps", as(eps) name("Graph") preview(off) replace
 
-* --- Figure DiD_combined (main.tex Section 2, ~line 219) ---
+* --- Paper Figure 2 (a) and (b) ---
 twoway rarea event_incumbent_ARPL4  event_incumbent_ARPL2 event_incumbent_ARPL1, color(gs15) || line event_incumbent_ARPL3 event_incumbent_ARPL1, mc(black) ms(S) lpattern(dash) lwidth(1.5)  ///
 || line event_exp_ARPL3 event_incumbent_ARPL1, mc(red) ms(S) lwidth(1.5)    ///
 || line event_nexp_ARPL3 event_incumbent_ARPL1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_incumbents_ARPL.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure2a_incumbent_firms.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp_ARPL4  event_exp_ARPL2 event_exp_abovemed_ARPL1, color(gs15) ||line event_exp_ARPL3 event_exp_belowmed_ARPL1, mc(black)  lwidth(1.5)  || line event_exp_abovemed_ARPL3 event_exp_abovemed_ARPL1, mc(red) lpattern(dash) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed_ARPL3 event_exp_abovemed_ARPL1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_exporters_ARPL.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure2b_always_exporting_firms.eps", as(eps) name("Graph") preview(off) replace
 
-* --- Table data_regression_did (main.tex Appendix ~line 1105) ---
+* --- Paper Table 11 ---
 collect style cell, nformat(%5.2f)
 collect style cell result[_r_se], sformat("(%s)")
 collect layout (colname#result p_d) (model)
 * Write table using stored scalars and matrices (col3=coef, col2=lo CI, col4=hi CI)
 * SE derived from 95% CI: se = (upper - lower) / 3.92
-file open didfile using "$tables/Table_data_regression_did.tex", write replace
+file open didfile using "$tables/Table11.tex", write replace
 file write didfile "    \begin{table}" _n
 file write didfile "    \caption{Capital growth difference in difference}" _n
 file write didfile "    \label{table:data_regression_did}" _n
@@ -1006,8 +1028,8 @@ file close didfile
 
 
 * ===================================================================
-* FIGURE DiD_combined_placebo (main.tex Appendix ~line 1085)
-* DiD_capital_incumbents_ARPL_placebo.eps, DiD_capital_exporters_ARPL_placebo.eps
+* PAPER FIGURE 12 (main.tex \label{fig:DiD_combined_placebo})
+* (a) Figure12a_incumbent_firms_placebo.eps, (b) Figure12b_always_exporting_firms_placebo.eps
 * Source: Tetenyi_fake_did.do
 * ===================================================================
 gen treated2 = 1 if (no_access_credit_ever==1 & year>2004)
@@ -1158,18 +1180,18 @@ twoway rarea event_incumbent_ARPL_fake4  event_incumbent_ARPL_fake2 event_incumb
 || line event_nexp_ARPL_fake3 event_incumbent_ARPL_fake1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2004, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_incumbents_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure12a_incumbent_firms_placebo.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea  event_exp_ARPL_fake4  event_exp_ARPL_fake2 event_exp_abovemed_ARPL_fake1, color(gs15) ||line event_exp_ARPL_fake3 event_exp_belowmed_ARPL_fake1, mc(black)  lwidth(1.5)  || line event_exp_abovemed_ARPL_fake3 event_exp_abovemed_ARPL_fake1, mc(red) lpattern(dash) ms(S) lwidth(1.5)    ///
  || line event_exp_belowmed_ARPL_fake3 event_exp_abovemed_ARPL_fake1, mc(black)  lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Above median equity" 4 "Below median equity" ) row(1))  ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2004, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_exporters_ARPL_placebo.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure12b_always_exporting_firms_placebo.eps", as(eps) name("Graph") preview(off) replace
 
 
 * ===================================================================
-* FIGURE DiD_combined_manufacturing (main.tex Appendix ~line 1179)
-* DiD_capital_incumbents_manuf.eps, DiD_capital_incumbents_nomanuf.eps
+* PAPER FIGURE 14 (main.tex \label{fig:DiD_combined_manufacturing})
+* (a) Figure14a_manufacturing_incumbents.eps, (b) Figure14b_other_incumbents.eps
 * ===================================================================
 collect create exa6, replace
 preserve
@@ -1251,23 +1273,23 @@ twoway rarea event_incumbent_manuf4  event_incumbent_manuf2 event_incumbent_manu
 || line event_nexp_manuf3 event_incumbent_manuf1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_incumbents_manuf.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure14a_manufacturing_incumbents.eps", as(eps) name("Graph") preview(off) replace
 
 twoway rarea event_incumbent_nomanuf4  event_incumbent_nomanuf2 event_incumbent_nomanuf1, color(gs15) || line event_incumbent_nomanuf3 event_incumbent_nomanuf1, mc(black) ms(S)  lwidth(1.5)  ///
 || line event_exp_nomanuf3 event_incumbent_nomanuf1, mc(red) ms(S) lpattern(dash) lwidth(1.5)    ///
 || line event_nexp_nomanuf3 event_incumbent_nomanuf1,  mc(black) lpattern(dot) lwidth(2.5) ///
 legend(order(2 "All" 3 "Exporters" 4 "Non-exporters ") row(1)) ylabel(-0.2 "-20%" -0.1 "-10%" 0 "0%" 0.1 "10%" 0.2 "20%" 0.3 "30%" 0.4 "40%" 0.5 "50%") xtitle("") xla(2000/2008) scheme(s1mono) yscale(range (-0.2,0.5)) ///
 xli(2001, lc(gs8) lw(thin)) xtitle("") ytitle("log(K)") yla(, ang(h))
-graph export "$figures/DiD_capital_incumbents_nomanuf.eps", as(eps) name("Graph") preview(off) replace
+graph export "$figures/Figure14b_other_incumbents.eps", as(eps) name("Graph") preview(off) replace
 
 
 * ===================================================================
-* TABLE industry_shares_did (main.tex ~line 1153)
+* PAPER TABLE 12 (main.tex \label{tab:industry_shares_did})
 * Industry shares in 2000 and 2008 for selected sectors
 * Source: Tetenyi_main_v5.do lines 1501-1568
-* Exports to Tables/Table_industry_shares.tex; values printed to log
+* Exports to Tables/Table12.tex; values printed to log
 * ===================================================================
-di "=== TABLE industry_shares_did: Industry shares by year ==="
+di "=== Paper Table 12: Industry shares by year ==="
 preserve
     collapse (sum) value_added capital export_value exportdummy, by(year ind10)
     bys year: egen total_value_added = total(value_added)
@@ -1297,7 +1319,7 @@ preserve
     local name3 "Transportation"
     local name4 "Business services"
     local name5 "Public services"
-    file open myfile using "$tables/Table_industry_shares.tex", write replace
+    file open myfile using "$tables/Table12.tex", write replace
     file write myfile "\begin{table}[htbp]" _n
     file write myfile "\centering" _n
     file write myfile "\caption{Industry Shares in 2000 and 2008}" _n
@@ -1329,12 +1351,12 @@ preserve
 restore
 
 * ===================================================================
-* TABLE Table23 (main.tex ~line 1188)
+* PAPER TABLE 13 (main.tex \label{table:Table23})
 * Value-added fixed-effect regression for calibrating productivity process
 * Source: Tetenyi_main_v5.do line 976
-* Results printed to log; copy values into hardcoded table in main.tex
+* Exports to Tables/Table13.tex; results also printed to log
 * ===================================================================
-di "=== TABLE Table23: Value-added fixed-effect regression ==="
+di "=== Paper Table 13: Value-added fixed-effect regression ==="
 xtset sorszam year
 xtreg log_value_added L.log_value_added if flag_incumbent==1, fe
 di "Lag coef:  " _b[L.log_value_added] "  s.e.: " _se[L.log_value_added]
@@ -1357,7 +1379,7 @@ scalar t23_sige    = e(sigma_e)
 scalar t23_r2w     = e(r2_w)
 scalar t23_r2b     = e(r2_b)
 scalar t23_r2o     = e(r2_o)
-file open t23file using "$tables/Table_Table23.tex", write replace
+file open t23file using "$tables/Table13.tex", write replace
 file write t23file "\begin{table}[h!]" _n
 file write t23file "\caption{Value added regression}" _n
 file write t23file "\centering" _n
@@ -1387,12 +1409,12 @@ file write t23file "\end{table}" _n
 file close t23file
 
 * ===================================================================
-* TABLE data_op_decomp (main.tex Appendix ~line 1226)
+* PAPER TABLE 14 (main.tex \label{table:data_op_decomp})
 * Dynamic Olley-Pakes decomposition for ARPK, 2001-2008
 * Source: Tetenyi_alternatives.do lines 109-136
-* Results stored in scalars, exported to Tables/Table_data_op_decomp.tex
+* Results stored in scalars, exported to Tables/Table14.tex
 * ===================================================================
-di "=== TABLE data_op_decomp: Dynamic Olley-Pakes decomposition for ARPK ==="
+di "=== Paper Table 14: Dynamic Olley-Pakes decomposition for ARPK ==="
 
 di "Full sample:"
 olleyp year sorszam log_ARPK capital, base(2001) end(2008)
@@ -1475,7 +1497,7 @@ scalar op_newborn_nexpdom    = r(newborns)
 scalar op_exit_nexpdom       = r(exiters)
 restore
 
-file open opfile using "$tables/Table_data_op_decomp.tex", write replace
+file open opfile using "$tables/Table14.tex", write replace
 file write opfile "\begin{table}[h!]" _n
 file write opfile "\caption{Dynamic Olley-Pakes decomposition for ARPK growth, \% , 2001-2008}" _n
 file write opfile "\label{table:data_op_decomp}" _n
@@ -1499,13 +1521,14 @@ file write opfile "\end{table}" _n
 file close opfile
 
 * ===================================================================
-* MOMENTS FOR MIXED TABLES (Table1, Table_regs, Table5)
+* MOMENTS FOR MIXED TABLES (paper Tables 2, 4 and 6; the .tex files are
+* written by Model/figures_tables.jl)
 * These three tables combine Hungarian firm-level moments (computed
 * below) with moments from the Julia quantitative model. The output
 * file Hungary_firm_level_data.txt documents which row/column of each
 * table comes from which source, and reports all firm-level values.
 * ===================================================================
-di "=== MOMENTS FOR MIXED TABLES (Table1, Table_regs, Table5) ==="
+di "=== MOMENTS FOR MIXED TABLES (paper Tables 2, 4 and 6) ==="
 
 preserve
 
@@ -1522,15 +1545,15 @@ bysort sorszam (year): gen _spell = sum(_cstart) if exportdummy==1
 bysort sorszam _spell (year): gen cum_dur = _n if exportdummy==1 & !missing(_spell)
 
 
-* ===== TABLE 1: Calibrated parameters and moments =====
+* ===== Paper TABLE 2: Calibrated parameters and moments =====
 * Firm dynamics rows: f_ex, sigma_z, rho_z
-* sigma_z (0.82) and rho_z (0.43) already come from Table23 regression above.
+* sigma_z (0.82) and rho_z (0.43) already come from the paper Table 13 regression above.
 * f_ex target: fraction of all firms that ever enter exports (n_expent/n_all)
 * n_expent and n_all are defined in the data_micro section above.
 
 scalar t1_entry_rate = round(100 * n_expent / n_all, 0.1)
 
-* ===== TABLE_regs: Exporting dynamics, Data columns (1)-(4) =====
+* ===== Paper TABLE 4: Exporting dynamics, Data columns (1)-(4) =====
 * LPM of current export status on log value added, lagged status/share.
 * Industry and year FEs (no industry for model 4). SE clustered by industry.
 
@@ -1568,7 +1591,7 @@ scalar tr_ls_se4 = round(_se[lag_exportshare], 0.0001)
 scalar tr_N4     = e(N)
 scalar tr_r2_4   = round(e(r2_a), 0.01)
 
-* ===== TABLE 5: Impact of trade liberalization, Data columns (2001 and 2008) =====
+* ===== Paper TABLE 6: Impact of trade liberalization, Data columns (2001 and 2008) =====
 
 foreach y in 2001 2008 {
 
@@ -1642,17 +1665,17 @@ file write hfl " Source: firm_data_appended.dta via empirics_replication.do" _n
 file write hfl " Julia model moments are indicated separately per table." _n
 file write hfl "======================================================" _n _n
 
-file write hfl "TABLE 1: Calibrated parameters and moments" _n
+file write hfl "Paper TABLE 2 (Tables/Table2.tex): Calibrated parameters and moments" _n
 file write hfl "------------------------------------------------------" _n
 file write hfl "Firm dynamics rows — Data column from firm_appended.dta:" _n
 file write hfl "  f_ex    | Entry rate to exports  | Data = " %5.1f (t1_entry_rate) " % | Model target = 20 %" _n
 file write hfl "           (fraction of all firms that ever enter exports: n_expent/n_all)" _n
-file write hfl "  sigma_z | SD of value added      | Data = 0.82  (from Table23 FE regression)" _n
-file write hfl "  rho_z   | AR(1) of value added   | Data = 0.431 (from Table23 FE regression)" _n _n
+file write hfl "  sigma_z | SD of value added      | Data = 0.82  (from Table 13 FE regression)" _n
+file write hfl "  rho_z   | AR(1) of value added   | Data = 0.431 (from Table 13 FE regression)" _n _n
 file write hfl "Financial Development and Trade rows: macro data only (BIS, ECB, WB, TiVA)." _n
 file write hfl "Model column (Data and Model): Julia output." _n _n
 
-file write hfl "TABLE_regs: Exporting dynamics in model vs. data" _n
+file write hfl "Paper TABLE 4 (Tables/Table4.tex): Exporting dynamics in model vs. data" _n
 file write hfl "------------------------------------------------------" _n
 file write hfl "Entry cost / Per-period cost columns: Julia model output." _n
 file write hfl "Data columns (1)-(4): LPM regressions on firm_appended.dta." _n
@@ -1672,7 +1695,7 @@ file write hfl "    Log value added:  " %7.4f (tr_va4) "  (" %7.4f (tr_se4) ")" 
 file write hfl "    Prev export status: " %7.4f (tr_ld4) "  (" %7.4f (tr_ld_se4) ")" _n
 file write hfl "    Prev export share: " %7.4f (tr_ls4) "  (" %7.4f (tr_ls_se4) ")" _n _n
 
-file write hfl "TABLE 5: Impact of trade liberalization on firms" _n
+file write hfl "Paper TABLE 6 (Tables/Table6.tex): Impact of trade liberalization on firms" _n
 file write hfl "------------------------------------------------------" _n
 file write hfl "Model columns (None / Trade / Trade & capital): Julia output." _n
 file write hfl "Data columns (2001, 2008): firm_appended.dta moments below." _n
