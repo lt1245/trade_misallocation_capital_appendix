@@ -2,12 +2,23 @@
 # figures_tables.jl
 #
 # Reproduces every figure and table that appears in main.tex and is generated
-# by the Julia model code.  Sections are named after their main.tex label so
-# that each output can be located immediately.
+# by the Julia model code.  Each section header gives the figure/table number
+# in the paper, the output file(s) and the main.tex label.
 #
-# OUTPUTS NOT PRODUCED (present in original plot files but absent from main.tex):
-#   Figure5d.pdf   Figure8a.pdf   Figure8b.pdf   Figure11b.pdf   Figure12j.pdf
-#   Figure19a/b    Figure20a/b    Figure21a/b    Figure22a/b/c
+# OUTPUT FILE NAMES follow the numbering of the paper:
+#   Tables/TableN.tex                    = Table N in the paper
+#   Figures/FigureN.ext                  = Figure N (single panel)
+#   Figures/FigureN<panel>_<title>.pdf   = panel <panel> of Figure N, where
+#                                          <title> is the panel's title
+#   Figures/FigureN_<row>_<column>.pdf   = Figures 15 and 16, whose panels
+#                                          carry no letter in the paper
+# Panels that appear in two figures of the paper (Figure 5 (a), (b), (j) =
+# Figure 18 (a), 19 (a), 20 (a); Figure 18 (b), 19 (b), 20 (b) = Figure 21 (a),
+# (b), (j)) are saved once and copied to the second name.
+# Julia outputs: Figure 1, Figures 3-6, 15-21; Tables 2-6, 15-25.
+# The remaining figures and tables come from the Stata do-files in Empirics/.
+#
+# Panels of the legacy plot files that are not in the paper are not produced.
 #
 # HOW TO RESUME
 # =============
@@ -99,9 +110,8 @@ step_fc_trans         = 0   # Step 5  — transition cases 18-20 (FC model)
 # Provides: all _initial, _closed_CM_open_trade, _open_CM_open_trade,
 #           _open_CM_closed_trade variable families; Baseline_parameter;
 #           open_CM_open_trade_parameter; prices_*; aggregates_*.
-# Required by: Table1, Table2, Figure4, Table4, Table5, Table_regs,
-#              Figure5, Figure6, Figure7, Figure9, Figure10, Figure11,
-#              Figure12, Table8, Table9, Table10, Table11, Table4b.
+# Required by: every model-based output, i.e. all outputs of this file except
+#              Figure 1 (Tables 2-6, 15-25; Figures 3-6, 15-21).
 # =============================================================================
 if step_baseline_ss == 0
     include("main_script.jl")
@@ -114,8 +124,7 @@ end
 # Must run before Step 3 because transition cases 6 and 7 require
 # prices_initial_dev and other *_dev variables defined in this file.
 # Provides: all _dev variable families, Developed_parameter.
-# Required by: transition cases 6-7, tab:combined/Table10, tab:combined/Table11,
-#              tab:Table4b.
+# Required by: transition cases 6-7, Table 23 (both panels), Table 24.
 # =============================================================================
 if step_dev_ss == 0
     include("developed_steady_states.jl")
@@ -135,8 +144,7 @@ end
 # Case 7: dev initial → dev open_CM_open_trade
 # Provides: V_saved_store_*, capital_supply_future_*, K_x_ratio_store_*,
 #           TFP_store_*, total_consumption_store_*, coeff_store_*_dev, etc.
-# Required by: Table8, Figure12, Figure12b, Figure12c, Table9, Table4b,
-#              Table10, Table11, Table_regs (welfare calcs).
+# Required by: Tables 4 (welfare calcs), 20, 22, 23, 24; Figures 5, 6, 17.
 # =============================================================================
 if step_transitions == 0
     load_solution = 1; save_solution = 0; asymmetric_liberalization = 0
@@ -157,7 +165,7 @@ end
 # never set at global scope.  We reconstruct them here from the named outputs
 # of Residual_stst_detailed (open_CM_open_trade, country 1 = NMS).
 # Q_trans_BL is rebuilt by calling Q_transition with the converged coeff.
-# Required by: [tab:Table_regs] columns 1-2.
+# Required by: Table 4 columns 1-2.
 # =============================================================================
 if step_save_reg_vars == 0
     # ------------------------------------------------------------------
@@ -271,8 +279,7 @@ end
 # NMS reduces tariffs over 11 years; Core reduces over 4 years.
 # Outputs: all *_asym variable families
 #   (TFP_store_*_asym, K_x_ratio_store_*_asym, V_saved_store_*_asym, etc.)
-# Required by: [fig:Figure12_cons], [fig:Figure12_TFP], [fig:Figure12_ARPK],
-#              [fig:Figure12_asym], [table:Table_asym].
+# Required by: Figures 18-21, Table 25.
 # =============================================================================
 if step_asym_trans == 0
     load_solution = 1; save_solution = 0; asymmetric_liberalization = 1
@@ -288,9 +295,7 @@ end
 # STEP 4 — Fixed-cost model steady states
 # Provides: all _FC variable families, Baseline_parameter_FC,
 #           open_CM_open_trade_parameter_FC.
-# Required by: tab:calibration_fixed_cost, tab:nontargeted_fixed_cost,
-#              tab:results_fixed_cost, tab:results_fixed_cost_micro,
-#              tab:Table_regs (columns 3-4).
+# Required by: Tables 16-19, Table 4 (columns 3-4).
 # =============================================================================
 if step_fc_ss == 0
     include("fixed_cost_steady_states.jl")
@@ -302,8 +307,7 @@ end
 # STEP 5 — FC model transition dynamics
 # Loads: transition.jl cases 18 (trade-only FC), 19 (full FC), 20 (delayed FC)
 # Provides: V_saved_store_*_FC, capital_supply_future_*_FC, etc.
-# Required by: tab:calibration_fixed_cost, tab:results_fixed_cost,
-#              tab:results_fixed_cost_micro, tab:Table_regs (columns 3-4).
+# Required by: Tables 16, 18, 19, Table 4 (columns 3-4).
 # =============================================================================
 if step_fc_trans == 0
     load_solution = 1; save_solution = 0; asymmetric_liberalization = 0
@@ -317,7 +321,7 @@ end
 # =============================================================================
 # SHARED WELFARE CALCULATIONS
 # Must run after Steps 1-2. Produces scalar welfare CEVs and V_trans_* vectors
-# used by Table8, Table9, and several figures.
+# used by Tables 20 and 22, and several figures.
 # Source: plot.jl lines 39-160
 # =============================================================================
 
@@ -396,7 +400,9 @@ current_producer_open_CM_open_trade_mat   = current_exporter_open_CM_open_trade_
 println("Shared welfare calculations done.")
 
 # =============================================================================
-# [fig:Figure1]  Evolution of Hungary's foreign credit, imports, and tariffs
+# [Figure 1]  Evolution of Hungary's foreign credit, imports, and tariffs
+# Output: ../Figures/Figure1.tikz  (pgfplots code; see README for the LaTeX
+#         packages needed to compile it)
 # main.tex: \label{fig:Figure1}
 # Source: ../Data/Hungary_macrodata.xlsx
 # Prerequisites: none (reads directly from Excel)
@@ -580,14 +586,14 @@ const hfd = let
             end
             continue
         end
-        # Single-value Table 1 rows
+        # Single-value rows of paper Table 2 (calibration)
         m = match(r"f_ex\s*\|.*Data =\s*([\d.]+)", ln)
         if m !== nothing; d["f_ex_pct"] = parse(Float64, m[1]); continue; end
         m = match(r"sigma_z\s*\|.*Data =\s*([\d.]+)", ln)
         if m !== nothing; d["sigma_z"] = parse(Float64, m[1]); continue; end
         m = match(r"rho_z\s*\|.*Data =\s*([\d.]+)", ln)
         if m !== nothing; d["rho_z"] = parse(Float64, m[1]); continue; end
-        # Table_regs Data(k) header: "  Data (k)  N = X  Adj.R2 = Y"
+        # Paper Table 4 Data(k) header: "  Data (k)  N = X  Adj.R2 = Y"
         m = match(r"Data \((\d)\)\s+N =\s*([\d,]+)\s+Adj\.R2 =\s*([\d.]+)", ln)
         if m !== nothing
             spec = parse(Int, m[1])
@@ -595,7 +601,7 @@ const hfd = let
             d["tr_r2_$spec"] = parse(Float64, m[3])
             continue
         end
-        # Table_regs regression coefficients and SEs
+        # Paper Table 4 regression coefficients and SEs
         if spec > 0
             m = match(r"Log value added:\s*([-\d.]+)\s+\(\s*([\d.]+)\)", ln)
             if m !== nothing
@@ -619,7 +625,8 @@ end
 println("  Loaded Hungary firm-level data ($(length(hfd)) entries) from Hungary_firm_level_data.txt")
 
 # =============================================================================
-# [table:Table1]  Calibrated parameters and moments
+# [Table 2]  Calibrated parameters and moments
+# Output: ../Tables/Table2.tex
 # main.tex: \label{table:Table1} — "Calibrated parameters and moments"
 # Source: plot.jl lines 162–175
 # Prerequisites: Step 1 (main_script.jl) only — no transition paths needed.
@@ -667,10 +674,10 @@ table_1_results[6,:] = [open_CM_open_trade_parameter.Fₓ[1], 0.27,
 table_1_results[7,:] = [open_CM_open_trade_parameter.σₛ[1], 0.82, sd_growth_rev_open_CM_open_trade[1]]
 table_1_results[8,:] = [open_CM_open_trade_parameter.ρ[1],  0.43, autocorr_rev_open_CM_open_trade[1]]
 
-println("[table:Table1] table_1_results computed.")
+println("[Table 2] table_1_results computed.")
 println(round.(table_1_results, digits=3))
 
-# --- Save Tables/Table1.tex ---
+# --- Save Tables/Table2.tex ---
 # Model moments (col 3): rows 1-6 shown as integers (×100 = %); rows 7-8 as decimals.
 # Parameter values (col 1): displayed as decimals, except f_ex shown as integer × 100 + "%".
 mkpath("../Tables")
@@ -726,15 +733,16 @@ Parameter & Value & Target & Source \\& Year & Data & Model \\\\
 \\parbox{0.9\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} Simulated moments of the model matched with moments in the data. Construction of the moments is described in detail in Appendix \\ref{appendix:data_sources}. All parameters are calibrated under the assumption that both trade and capital market integration are completed by 2008, except for \$\\tau_0\$, which is calibrated to target the pre-reform economy as closely as possible.}}
 \\end{table}
 """
-    open("../Tables/Table1.tex", "w") do io
+    open("../Tables/Table2.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table1.tex")
+    println("  Saved → ../Tables/Table2.tex")
 end
 
 # =============================================================================
-# [table:Table2]  Non-targeted / externally calibrated parameters
-# main.tex: \label{table:Table2} — appears just after Table 1
+# [Table 3]  Preassigned (externally calibrated) parameters
+# Output: ../Tables/Table3.tex
+# main.tex: \label{table:Table2} — appears just after paper Table 2
 # Source: plot.jl lines 177–183
 # Prerequisites: Step 1 only.
 #
@@ -762,10 +770,10 @@ table_2_results[6,:] = [open_CM_open_trade_parameter.Fₓ[2],
     prices_open_CM_open_trade[1] * prices_open_CM_open_trade[2] *
     prices_open_CM_open_trade[5]]
 
-println("[table:Table2] table_2_results computed.")
+println("[Table 3] table_2_results computed.")
 println(round.(table_2_results, digits=4))
 
-# --- Save Tables/Table2.tex ---
+# --- Save Tables/Table3.tex ---
 # Only row 6 col 2 is model-computed (the market-size ratio ≈ 6).
 # All other cells are parameter values or fixed text.
 let
@@ -804,24 +812,24 @@ Avg.\\ export entry cost, \$f_{ex}^*\$ & \$$(val_fex)\$ & \$f_{ex} \\times\$ Mar
 \\parbox{0.88\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} The Core economy is assumed to be more developed, productive, and larger than the NMS economy, but is still comparable. Parameters controlling Core variable export costs or firm productivity are set the same as in NMS, except for export entry cost, which corrects for the size differences across markets.}}
 \\end{table}
 """
-    open("../Tables/Table2.tex", "w") do io
+    open("../Tables/Table3.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table2.tex")
+    println("  Saved → ../Tables/Table3.tex")
 end
 
 # =============================================================================
-# [fig:Figure4]  Decision rules — capital utilisation and export decision map
+# [Figure 3]  Decision rules — capital utilisation and export decision map
 # main.tex: \label{fig:Figure4}
 # Source: plot.jl lines 187–210
 # Prerequisites: Step 1 (main_script.jl).
-# Outputs: ../Figures/Figure4a.pdf  (capital utilisation rate map)
-#          ../Figures/Figure4b.pdf  (export status decision map)
+# Outputs: ../Figures/Figure3a_capital_choice.pdf          ((a) capital utilisation rate map)
+#          ../Figures/Figure3b_export_status_decision.pdf  ((b) export status decision map)
 # =============================================================================
 
 mkpath("../Figures")
 
-# Figure4a — capital utilisation (k_used / k_opt) for exporters
+# Figure 3(a) — capital utilisation (k_used / k_opt) for exporters
 y_value = k_x_fine_open_CM_open_trade[:,1] ./ k_opt_x_fine_open_CM_open_trade[:,1]
 y_mat = mat_creator(y_value)
 y_mat_applied = 100.0 * y_mat[10:36, 1:100]
@@ -829,9 +837,9 @@ contour(y_mat_applied', fill=true, levels=5, c=cgrad(:Blues_6, rev=true),
     xlabel="Productivity", ylabel="Wealth", axis=nothing,
     tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
     legendfontsize=18)
-savefig("../Figures/Figure4a.pdf")
+savefig("../Figures/Figure3a_capital_choice.pdf")
 
-# Figure4b — export status decision map
+# Figure 3(b) — export status decision map
 y_value = future_occupation_fine_open_CM_open_trade[:,3,1,1]
 entry_dec = (future_occupation_fine_open_CM_open_trade[:,2,1,1] .== 3.0)
 y_value[entry_dec] .= 4.0
@@ -845,12 +853,12 @@ contourf(y_mat_applied', levels=5, c=cgrad(:Blues_6, categorical=true, rev=false
     xlabel="Productivity", ylabel="Wealth", axis=nothing, colorbar=nothing, lw=0,
     tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
     legendfontsize=18)
-savefig("../Figures/Figure4b.pdf")
+savefig("../Figures/Figure3b_export_status_decision.pdf")
 
-println("[fig:Figure4] Figure4a.pdf and Figure4b.pdf saved → ../Figures/")
+println("[Figure 3] Figure3a_capital_choice.pdf and Figure3b_export_status_decision.pdf saved → ../Figures/")
 
 # =============================================================================
-# [tab:Table4]  Trade liberalization under closed and integrated capital markets
+# [Table 5]  Trade liberalization under closed and integrated capital markets
 # main.tex: \label{tab:Table4}
 # Source: plot.jl lines 395–430
 # Prerequisites: Steps 1-2 (transitions for welfare row).
@@ -864,7 +872,7 @@ println("[fig:Figure4] Figure4a.pdf and Figure4b.pdf saved → ../Figures/")
 #   4  Relative output per cap  12  Import/GDP
 #  15  Share of exporters        13  NFA/GDP
 #  14  Entrepreneurship rate    16  Real exchange rate
-# Output: ../Tables/Table4.tex
+# Output: ../Tables/Table5.tex
 # =============================================================================
 
 price_union_wide_initial =
@@ -954,9 +962,9 @@ foreign_credit_share_closed_CM_open_trade =
 table_4_results[17,:] = [total_credit_initial, total_credit_closed_CM_open_trade,
     total_credit_open_CM_open_trade, 0.43, 0.54, 0.62]
 
-println("[tab:Table4] table_4_results (20×6) computed.")
+println("[Table 5] table_4_results (20×6) computed.")
 
-# --- Save Tables/Table4.tex ---
+# --- Save Tables/Table5.tex ---
 let
     r = table_4_results
     # Columns: None | Trade Only | Trade+Capital || 1991 | 2001 | 2008
@@ -1003,19 +1011,19 @@ Real exchange rate & $(fpct(r[16,1])) & $(fpct(r[16,2])) & $(fpct(r[16,3])) & - 
 \\parbox{0.90\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} The baseline economy without integration refers to the hypothetical state of the economy before reforms. The middle column shows the post-trade-liberalization, pre-capital-market-integration state of the economy, and the left column indicates the state of the economy after both trade and capital market integration, largely corresponding to 1991, 2001, and 2008 states of the NMS economy. Consumption-equivalent (CE) welfare change accounts for transition dynamics, assuming immediate integration of capital markets. Postponing by 10 years reduces gains to 12.2\\%. Starting from liberalized trade yields welfare gains of 6.2\\%. s.d. of ARPK stands for the standard deviation of the log of the average revenue product of capital. Relative output per capita is measured as NMS's GDP per capita relative to Core GDP per capita. Data counterparts are for Hungary only, with variables converted to the same initial values as in the model (when the value is 100 or for the real exchange rate).}}
 \\end{table}
 """
-    open("../Tables/Table4.tex", "w") do io
+    open("../Tables/Table5.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table4.tex")
+    println("  Saved → ../Tables/Table5.tex")
 end
 
 # =============================================================================
-# [tab:Table5]  Impact of trade liberalization on firms
+# [Table 6]  Impact of trade liberalization on firms
 # main.tex: \label{tab:Table5}
 # Source: plot.jl lines 433–522 (table_5_results) and 634–660 (table_6_results)
 # Prerequisites: Step 1.
 # Columns (5): None / Trade Only / Trade+Capital | 2001 / 2008
-# Output: ../Tables/Table5.tex
+# Output: ../Tables/Table6.tex
 # =============================================================================
 
 # table_5_results (22×5)
@@ -1175,9 +1183,9 @@ table_6_results[3,3] = sum(current_exporter_open_CM_mat[1:x_start,(y_start+1):en
 table_6_results[2,3] = sum(current_exporter_open_CM_mat[(x_start+1):end,1:y_start])/sum(current_exporter_open_CM_open_trade)
 table_6_results[1,3] = sum(current_exporter_open_CM_mat[1:x_start,1:y_start])/sum(current_exporter_open_CM_open_trade)
 
-println("[tab:Table5] table_5_results (22×5) and table_6_results (4×3) computed.")
+println("[Table 6] table_5_results (22×5) and table_6_results (4×3) computed.")
 
-# --- Save Tables/Table5.tex ---
+# --- Save Tables/Table6.tex ---
 let
     r5 = table_5_results
     r6 = table_6_results
@@ -1230,14 +1238,14 @@ High wealth and high productivity & $(fpct(r6[4,1])) & $(fpct(r6[4,2])) & $(fpct
 \\parbox{0.95\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} Standard deviation of average capital productivity is calculated within export status \\(\\{d, ex\\}\\). Productivity loss within export status is defined as the percentage deviation of \\(TFP_{i}\\) from \\(TFP_i^{e}\\), defined as the productivity of firms with the same export status \\(\\{d, ex\\}\\) that would occur if all firms were able to obtain their unconstrained input choice. For the distribution of exporters, each column sums to 1. The productivity threshold is the mean entrepreneurial productivity across all households, including non-firm operators. The wealth threshold is the median wealth of all entrepreneurs in a closed capital-market, liberalized-trade steady-state economy, for comparison with Figure \\ref{fig:DiD_combined}. Export sales decomposition follows \\cite{annurev:/content/journals/10.1146/annurev-economics-090919-025159} table 1 for both the data and the model-simulated data. The number of firms and capital size are normalized to their model counterparts, with 2001 values scaled to steady-state values after trade liberalization without capital market integration.}}
 \\end{table}
 """
-    open("../Tables/Table5.tex", "w") do io
+    open("../Tables/Table6.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table5.tex")
+    println("  Saved → ../Tables/Table6.tex")
 end
 
 # =============================================================================
-# [tab:Table_regs]  GLM regressions: entry cost vs per-period cost model
+# [Table 4]  GLM regressions: entry cost vs per-period cost model
 # main.tex: \label{tab:Table_regs}
 # Source: plot.jl lines 524–616 (baseline/entry-cost) + plot_FC.jl lines 223–315 (FC/per-period)
 # Prerequisites: Steps 1-4 (needs both BL and FC SS variables).
@@ -1250,7 +1258,7 @@ end
 #   Model: Entry cost (1) | Entry cost (2) | Per-period cost (1) | Per-period cost (2)
 #   Data:  (1) | (2) | (3) | (4)
 # Rows: Log value added coef / s.e. / Prev. export status coef / s.e. / N / Adj. R²
-# Output: ../Tables/Table_regs.tex
+# Output: ../Tables/Table4.tex
 # =============================================================================
 
 # --- Baseline (entry-cost) GLM regressions using *_BL variables ---
@@ -1461,9 +1469,9 @@ for ii = 1:nume_simu
     n2 = nobs(mdl2); m2FC_r2[ii] = 1 - (1 - r2(mdl2))*(n2-1)/(n2-4)
 end
 
-println("[tab:Table_regs] GLM regressions done (baseline BL and FC).")
+println("[Table 4] GLM regressions done (baseline BL and FC).")
 
-# --- Save Tables/Table_regs.tex ---
+# --- Save Tables/Table4.tex ---
 let
     # Average across 100 simulations
     c1_va_bl   = mean(m1BL_coef[:,2]);  s1_va_bl   = mean(m1BL_se[:,2])
@@ -1510,19 +1518,19 @@ Adj.\\ R\\textsuperscript{2} & $(f2(c1_r2_bl)) & $(f2(c2_r2_bl)) & $(f2(c1_r2_fc
 \\parbox{1.0\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} The coefficient estimates for the linear probability model on simulated data from the quantitative model (with entry cost or with per-period cost) or the Hungarian firm data. Model \\textbf{1} includes only log value-added as a regressor, whereas model \\textbf{2} includes previous export status as well. Because the export share is constant in the model, regressions \\textbf{3} \\& \\textbf{4} cannot be replicated, but they do not change the coefficient estimates of the first two coefficients. The treatment of the regression for the Hungarian data matches that of \\cite{annurev:/content/journals/10.1146/annurev-economics-090919-025159}, with industry dummies for models \\textbf{1}-\\textbf{3}, not for model \\textbf{4}, and year fixed effects for all of them. Standard errors, clustered at the industry level, are reported in parentheses. }}
 \\end{table}
 """
-    open("../Tables/Table_regs.tex", "w") do io
+    open("../Tables/Table4.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_regs.tex")
+    println("  Saved → ../Tables/Table4.tex")
 end
 
 # =============================================================================
-# [tab:cap_market_basis]  Capital-market integration starting from trade-only SS
+# [Table 15]  Capital-market integration starting from trade-only SS
 # main.tex: \label{tab:cap_market_basis}  (Appendix)
 # Source: plot.jl lines 212–307
 # Prerequisites: Steps 1-2 (welfare_change_oCM_from_otrade_trans needed).
 # Computes table_9b_results (20×2), table_5b_results (14×2), table_6b_results (4×3)
-# Outputs: ../Tables/Table_cap_market_basis.tex
+# Outputs: ../Tables/Table15.tex
 # =============================================================================
 
 # table_9b_results: aggregates with trade-only SS as baseline (cols: trade-only | trade+CM)
@@ -1599,9 +1607,9 @@ table_6b_results[3,3] = sum(current_exporter_open_CM_open_trade_mat[1:x_start_6b
 table_6b_results[2,3] = sum(current_exporter_open_CM_open_trade_mat[(x_start_6b+1):end,1:y_start_6b])/sum(current_exporter_open_CM_open_trade)
 table_6b_results[1,3] = sum(current_exporter_open_CM_open_trade_mat[1:x_start_6b,1:y_start_6b])/sum(current_exporter_open_CM_open_trade)
 
-println("[tab:cap_market_basis] table_9b, table_5b, table_6b computed.")
+println("[Table 15] table_9b, table_5b, table_6b computed.")
 
-# --- Save Tables/Table_cap_market_basis.tex ---
+# --- Save Tables/Table15.tex ---
 let
     r9 = table_9b_results; r5 = table_5b_results; r6 = table_6b_results
     f2(x) = @sprintf("%.2f", round(x, digits=2, RoundNearestTiesAway))
@@ -1611,7 +1619,7 @@ let
 \\centering
 \\caption{Capital market integration starting from trade-open economy}
 \\label{table:cap_market_basis}
-\\scalebox{0.6}{
+\\scalebox{0.7}{
 \\begin{tabular}{lcc@{\\hspace{3em}}lcc}
 \\\\[-1.8ex]\\hline
 \\hline \\\\[-1.8ex]
@@ -1644,22 +1652,22 @@ CPI & $(fpct(r9[16,1])) & $(fpct(r9[16,2])) & Low wealth and low productivity & 
 \\hline
 \\end{tabular}
 }
-\\parbox{1.5\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} The quantities without a data counterpart are normalized to the closed capital market steady state --- the integrated capital markets steady state is compared to the data in Table \\ref{table:Table4}. Asterisks indicate Core variables. Standard deviation of ARPK is calculated within firm status \$\\{d, ex\\}\$. Productivity loss is defined as \$\\frac{TFP_i^{e} - TFP_{i}}{TFP_i^{e}}\$ with \$TFP_i^{e}\$ defined as the productivity of firm status \$\\{d, ex\\}\$ that would occur if all firms would be able to obtain their unconstrained input choice. The productivity threshold is the average entrepreneurial productivity; the wealth threshold is the median wealth of all entrepreneurs in the closed capital market steady state. Numbers indicate percentages.}}
+\\parbox{1.0\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} The quantities without a data counterpart are normalized to the closed capital market steady state --- the integrated capital markets steady state is compared to the data in Table \\ref{table:Table4}. Asterisks indicate Core variables. Standard deviation of ARPK is calculated within firm status \$\\{d, ex\\}\$. Productivity loss is defined as \$\\frac{TFP_i^{e} - TFP_{i}}{TFP_i^{e}}\$ with \$TFP_i^{e}\$ defined as the productivity of firm status \$\\{d, ex\\}\$ that would occur if all firms would be able to obtain their unconstrained input choice. The productivity threshold is the average entrepreneurial productivity; the wealth threshold is the median wealth of all entrepreneurs in the closed capital market steady state. Numbers indicate percentages.}}
 \\end{table}
 """
-    open("../Tables/Table_cap_market_basis.tex", "w") do io
+    open("../Tables/Table15.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_cap_market_basis.tex")
+    println("  Saved → ../Tables/Table15.tex")
 end
 
 # =============================================================================
-# [tab:calibration_fixed_cost]  FC model calibrated parameters vs moments
+# [Table 16]  FC model calibrated parameters vs moments
 # main.tex: \label{tab:calibration_fixed_cost}  (Appendix)
 # Source: plot_FC.jl lines 33–47
 # Prerequisites: Steps 1 and 3 (both BL and FC SS).
 # table_1_results_FC (8×4): col1=param, col2=data target, col3=FC model, col4=BL model
-# Output: ../Tables/Table_calibration_FC.tex
+# Output: ../Tables/Table16.tex
 # =============================================================================
 
 # FC welfare scalars (needed first)
@@ -1720,9 +1728,9 @@ table_1_results_FC[7,:] = [open_CM_open_trade_parameter_FC.σₛ[1], 0.82,
 table_1_results_FC[8,:] = [open_CM_open_trade_parameter_FC.ρ[1], 0.43,
     autocorr_rev_open_CM_open_trade_FC[1], autocorr_rev_open_CM_open_trade[1]]
 
-println("[tab:calibration_fixed_cost] table_1_results_FC (8×4) computed.")
+println("[Table 16] table_1_results_FC (8×4) computed.")
 
-# --- Save Tables/Table_calibration_FC.tex ---
+# --- Save Tables/Table16.tex ---
 let
     r = table_1_results_FC
     f2(x) = @sprintf("%.2f", round(x, digits=2, RoundNearestTiesAway))
@@ -1754,19 +1762,19 @@ Auto-correlation of value-added & 0.43 & $(f2(r[8,3])) & $(f2(r[8,4])) \\\\
 }
 \\end{table}
 """
-    open("../Tables/Table_calibration_FC.tex", "w") do io
+    open("../Tables/Table16.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_calibration_FC.tex")
+    println("  Saved → ../Tables/Table16.tex")
 end
 
 # =============================================================================
-# [tab:nontargeted_fixed_cost]  FC model non-targeted moments
+# [Table 17]  FC model non-targeted moments
 # main.tex: \label{tab:nontargeted_fixed_cost}  (Appendix)
 # Source: plot_FC.jl lines 49–64
 # Prerequisites: Steps 1 and 3.
 # table_3_results_FC (14×3): col1=data, col2=FC model, col3=BL model
-# Output: ../Tables/Table_nontargeted_FC.tex
+# Output: ../Tables/Table17.tex
 # =============================================================================
 
 table_3_results_FC = zeros(14, 3)
@@ -1799,9 +1807,9 @@ table_3_results_FC[12,:] = [0.11, p99_income_open_CM_open_trade_FC[1], p99_incom
 table_3_results_FC[13,:] = [0.24, p90_income_initial_FC[1], p90_income_initial[1]]
 table_3_results_FC[14,:] = [0.06, p99_income_initial_FC[1], p99_income_initial[1]]
 
-println("[tab:nontargeted_fixed_cost] table_3_results_FC (14×3) computed.")
+println("[Table 17] table_3_results_FC (14×3) computed.")
 
-# --- Save Tables/Table_nontargeted_FC.tex ---
+# --- Save Tables/Table17.tex ---
 let
     r = table_3_results_FC
     f2(x) = @sprintf("%.2f", round(x, digits=2, RoundNearestTiesAway))
@@ -1839,19 +1847,19 @@ Top \$1\\%\$ income share & $(fpct(r[14,1])) & $(fpct(r[14,2])) & $(fpct(r[14,3]
 }
 \\end{table}
 """
-    open("../Tables/Table_nontargeted_FC.tex", "w") do io
+    open("../Tables/Table17.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_nontargeted_FC.tex")
+    println("  Saved → ../Tables/Table17.tex")
 end
 
 # =============================================================================
-# [tab:results_fixed_cost]  FC model trade-liberalization aggregates
+# [Table 18]  FC model trade-liberalization aggregates
 # main.tex: \label{tab:results_fixed_cost}  (Appendix)
 # Source: plot_FC.jl lines 86–125
 # Prerequisites: Steps 1, 3, 4.
 # table_4_results_FC (20×6): same structure as table_4_results
-# Output: ../Tables/Table_results_FC.tex
+# Output: ../Tables/Table18.tex
 # =============================================================================
 
 current_exporter_closed_CM_FC = current_distr_store_closed_CM_open_trade_FC[
@@ -1941,9 +1949,9 @@ total_credit_open_CM_FC2 =
 table_4_results_FC[17,:] = [total_credit_initial_FC, total_credit_closed_CM_FC,
     total_credit_open_CM_FC2, 43, 54, 62]
 
-println("[tab:results_fixed_cost] table_4_results_FC (20×6) computed.")
+println("[Table 18] table_4_results_FC (20×6) computed.")
 
-# --- Save Tables/Table_results_FC.tex ---
+# --- Save Tables/Table18.tex ---
 let
     r = table_4_results_FC
     b = table_4_results
@@ -1988,19 +1996,19 @@ REER & $(fpct(r[16,1])) & $(fpct(r[16,2])) & $(fpct(r[16,3])) & $(fpct(b[16,1]))
 }
 \\end{table}
 """
-    open("../Tables/Table_results_FC.tex", "w") do io
+    open("../Tables/Table18.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_results_FC.tex")
+    println("  Saved → ../Tables/Table18.tex")
 end
 
 # =============================================================================
-# [tab:results_fixed_cost_micro]  FC model firm-level aggregates
+# [Table 19]  FC model firm-level aggregates
 # main.tex: \label{tab:results_fixed_cost_micro}  (Appendix)
 # Source: plot_FC.jl lines 127–221
 # Prerequisites: Steps 1 and 3.
 # table_5_results_FC (22×5): same structure as table_5_results
-# Output: ../Tables/Table_results_FC_micro.tex
+# Output: ../Tables/Table19.tex
 # =============================================================================
 
 table_5_results_FC = zeros(22, 5)
@@ -2135,9 +2143,9 @@ table_6_results_FC[3,3] = sum(mat_fc6_op[1:x_start_fc6,(y_start_fc6+1):end])/sum
 table_6_results_FC[2,3] = sum(mat_fc6_op[(x_start_fc6+1):end,1:y_start_fc6])/sum(current_exporter_open_CM_FC)
 table_6_results_FC[1,3] = sum(mat_fc6_op[1:x_start_fc6,1:y_start_fc6])/sum(current_exporter_open_CM_FC)
 
-println("[tab:results_fixed_cost_micro] table_5_results_FC and table_6_results_FC computed.")
+println("[Table 19] table_5_results_FC and table_6_results_FC computed.")
 
-# --- Save Tables/Table_results_FC_micro.tex ---
+# --- Save Tables/Table19.tex ---
 let
     r  = table_5_results_FC
     b  = table_5_results
@@ -2192,25 +2200,27 @@ High wealth and high productivity & $(fpct(r6[4,1])) & $(fpct(r6[4,2])) & $(fpct
 }
 \\end{table}
 """
-    open("../Tables/Table_results_FC_micro.tex", "w") do io
+    open("../Tables/Table19.tex", "w") do io
         write(io, tex)
     end
-    println("  Saved → ../Tables/Table_results_FC_micro.tex")
+    println("  Saved → ../Tables/Table19.tex")
 end
 
 # =============================================================================
-# [fig:combined_changes]  Capital, profit, exit maps — trade+CM vs trade-only
+# [Figure 15]  Capital, profit, exit maps — trade+CM vs trade-only
 # main.tex: \label{fig:combined_changes} (appendix)
-# Figures: Figure5a (capital ∆ integrated CM, Blues)
-#          Figure5b (capital ∆ trade-only,    Oranges)
-#          Figure6a (profit ∆ integrated CM,  Blues)
-#          Figure6b (profit ∆ trade-only,     Oranges)
-#          Figure7a (exit decision ∆ open CM vs initial, Blues)
-#          Figure7b (exit decision ∆ closed CM vs initial, Oranges)
+# Panels carry no letter in the paper: top row = integrated CM, bottom row =
+# closed CM; columns = capital, profits, exit decision.
+# Outputs: ../Figures/Figure15_capital_integratedCM.pdf  (top left,      Blues)
+#          ../Figures/Figure15_profits_integratedCM.pdf  (top middle,    Blues)
+#          ../Figures/Figure15_exit_integratedCM.pdf     (top right,     Blues)
+#          ../Figures/Figure15_capital_closedCM.pdf      (bottom left,   Oranges)
+#          ../Figures/Figure15_profits_closedCM.pdf      (bottom middle, Oranges)
+#          ../Figures/Figure15_exit_closedCM.pdf         (bottom right,  Oranges)
 # Source: plot.jl lines 664–712
 # =============================================================================
 let
-    # Figure5a — capital per exporter: open_CM_open_trade / initial (Blues)
+    # Figure 15, top left — capital per exporter: open_CM_open_trade / initial (Blues)
     y_value = k_x_fine_open_CM_open_trade[:,1] ./ k_x_fine_initial[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2218,10 +2228,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure5a.pdf")
-    println("[fig:combined_changes] Saved Figure5a.pdf")
+    savefig("../Figures/Figure15_capital_integratedCM.pdf")
+    println("[Figure 15] Saved Figure15_capital_integratedCM.pdf")
 
-    # Figure5b — capital per exporter: closed_CM_open_trade / initial (Oranges)
+    # Figure 15, bottom left — capital per exporter: closed_CM_open_trade / initial (Oranges)
     y_value = k_x_fine_closed_CM_open_trade[:,1] ./ k_x_fine_initial[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2229,10 +2239,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure5b.pdf")
-    println("[fig:combined_changes] Saved Figure5b.pdf")
+    savefig("../Figures/Figure15_capital_closedCM.pdf")
+    println("[Figure 15] Saved Figure15_capital_closedCM.pdf")
 
-    # Figure6a — profit: open_CM_open_trade / initial (Blues)
+    # Figure 15, top middle — profit: open_CM_open_trade / initial (Blues)
     y_value = Profit_fine_x_open_CM_open_trade[:,1] ./ Profit_fine_x_initial[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2240,10 +2250,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure6a.pdf")
-    println("[fig:combined_changes] Saved Figure6a.pdf")
+    savefig("../Figures/Figure15_profits_integratedCM.pdf")
+    println("[Figure 15] Saved Figure15_profits_integratedCM.pdf")
 
-    # Figure6b — profit: closed_CM_open_trade / initial (Oranges)
+    # Figure 15, bottom middle — profit: closed_CM_open_trade / initial (Oranges)
     y_value = Profit_fine_x_closed_CM_open_trade[:,1] ./ Profit_fine_x_initial[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2251,10 +2261,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure6b.pdf")
-    println("[fig:combined_changes] Saved Figure6b.pdf")
+    savefig("../Figures/Figure15_profits_closedCM.pdf")
+    println("[Figure 15] Saved Figure15_profits_closedCM.pdf")
 
-    # Figure7a — exit decision: open_CM vs initial (Blues 3-level)
+    # Figure 15, top right — exit decision: open_CM vs initial (Blues 3-level)
     y_value = 2 .* (future_occupation_fine_open_CM_open_trade[:,3,1,1] .- 1) .+
               (future_occupation_fine_initial[:,3,1,1] .- 1)
     y_mat   = mat_creator(y_value)
@@ -2263,10 +2273,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, colorbar=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure7a.pdf")
-    println("[fig:combined_changes] Saved Figure7a.pdf")
+    savefig("../Figures/Figure15_exit_integratedCM.pdf")
+    println("[Figure 15] Saved Figure15_exit_integratedCM.pdf")
 
-    # Figure7b — exit decision: closed_CM vs initial (Oranges 3-level)
+    # Figure 15, bottom right — exit decision: closed_CM vs initial (Oranges 3-level)
     y_value = 2 .* (future_occupation_fine_closed_CM_open_trade[:,3,1,1] .- 1) .+
               (future_occupation_fine_initial[:,3,1,1] .- 1)
     y_mat   = mat_creator(y_value)
@@ -2275,20 +2285,20 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, colorbar=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure7b.pdf")
-    println("[fig:combined_changes] Saved Figure7b.pdf")
+    savefig("../Figures/Figure15_exit_closedCM.pdf")
+    println("[Figure 15] Saved Figure15_exit_closedCM.pdf")
 end
 
 # =============================================================================
-# [fig:Figure_CMI_only]  Capital-market-integration marginal-effect maps
+# [Figure 4]  Capital-market-integration marginal-effect maps
 # main.tex: \label{fig:Figure_CMI_only}
-# Figures: Figure5c (capital ∆ open_CM / closed_CM, Blues)
-#          Figure6c (profit ∆ open_CM / closed_CM, Blues)
-#          Figure7c (exit decision open_CM vs closed_CM, Blues)
+# Outputs: ../Figures/Figure4a_change_in_capital.pdf  ((a) capital ∆ open_CM / closed_CM, Blues)
+#          ../Figures/Figure4b_change_in_profits.pdf  ((b) profit ∆ open_CM / closed_CM, Blues)
+#          ../Figures/Figure4c_exit_decision.pdf      ((c) exit decision open_CM vs closed_CM, Blues)
 # Source: plot.jl lines 273–278, 695–700, 714–718
 # =============================================================================
 let
-    # Figure5c — capital: open_CM_open_trade / closed_CM_open_trade (Blues)
+    # Figure 4(a) — capital: open_CM_open_trade / closed_CM_open_trade (Blues)
     y_value = k_x_fine_open_CM_open_trade[:,1] ./ k_x_fine_closed_CM_open_trade[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2296,10 +2306,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure5c.pdf")
-    println("[fig:Figure_CMI_only] Saved Figure5c.pdf")
+    savefig("../Figures/Figure4a_change_in_capital.pdf")
+    println("[Figure 4] Saved Figure4a_change_in_capital.pdf")
 
-    # Figure6c — profit: open_CM_open_trade / closed_CM_open_trade (Blues)
+    # Figure 4(b) — profit: open_CM_open_trade / closed_CM_open_trade (Blues)
     y_value = Profit_fine_x_open_CM_open_trade[:,1] ./ Profit_fine_x_closed_CM_open_trade[:,1]
     y_mat   = mat_creator(y_value)
     y_mat_applied = 100.0 .* y_mat[10:36, 1:100] .- 100
@@ -2307,10 +2317,10 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure6c.pdf")
-    println("[fig:Figure_CMI_only] Saved Figure6c.pdf")
+    savefig("../Figures/Figure4b_change_in_profits.pdf")
+    println("[Figure 4] Saved Figure4b_change_in_profits.pdf")
 
-    # Figure7c — exit decision: open_CM vs closed_CM (Blues 3-level)
+    # Figure 4(c) — exit decision: open_CM vs closed_CM (Blues 3-level)
     y_value = 2 .* (future_occupation_fine_open_CM_open_trade[:,3,1,1] .- 1) .+
               (future_occupation_fine_closed_CM_open_trade[:,3,1,1] .- 1)
     y_mat   = mat_creator(y_value)
@@ -2319,22 +2329,25 @@ let
             xlabel="Productivity", ylabel="Wealth", axis=nothing, colorbar=nothing, lw=0,
             tickfontsize=14, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure7c.pdf")
-    println("[fig:Figure_CMI_only] Saved Figure7c.pdf")
+    savefig("../Figures/Figure4c_exit_decision.pdf")
+    println("[Figure 4] Saved Figure4c_exit_decision.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12]  Transition dynamics after trade liberalization
+# [Figure 5]  Transition dynamics after trade liberalization
 # main.tex: \label{fig:Figure12}
-# Figures: Figure12a (TFP), 12b (capital), 12c (consumption), 12d (exporters),
-#          12e (non-exporters), 12f (exporter share), 12g (K/exporter),
-#          12h (K/non-exporter), 12i (capital share exporters),
-#          12k (s.d. ARPK all), 12l (s.d. ARPK domestic), 12m (s.d. ARPK exporter)
-#          [12j skipped — commented out in main.tex]
+# Outputs (../Figures/, one file per panel, letter = panel in the paper):
+#   Figure5a_consumption.pdf               Figure5g_capital_per_exporter.pdf
+#   Figure5b_TFP.pdf                       Figure5h_capital_per_nonexporter.pdf
+#   Figure5c_capital.pdf                   Figure5i_capital_share_of_exporters.pdf
+#   Figure5d_exporters.pdf                 Figure5j_sd_ARPK.pdf
+#   Figure5e_nonexporters.pdf              Figure5k_nonexporter_sd_ARPK.pdf
+#   Figure5f_share_of_exporter_firms.pdf   Figure5l_exporter_sd_ARPK.pdf
+# The labor share of exporters is not in the paper and is not produced.
 # Source: plot.jl lines 730–882
 # =============================================================================
 let
-    # --- TFP (Figure12a) ---
+    # --- TFP (Figure 5(b)) ---
     TFP_corr_open    = TFP_open_CM_open_trade[1] / TFP_store_open_CM_open_trade[1,end]
     TFP_corr_closed  = TFP_closed_CM_open_trade[1] / TFP_store_closed_CM_open_trade[1,end-1]
     TFP_corr_delayed = TFP_open_CM_open_trade[1] / TFP_store_open_CMdelayed_open_trade[1,end-1]
@@ -2345,10 +2358,10 @@ let
          legend=(0.5,0.7), linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[4,35],
          label=["Immediate full integration" "Historical" "Only trade"], legendfont=font(14))
-    savefig("../Figures/Figure12a.pdf")
-    println("[fig:Figure12] Saved Figure12a.pdf")
+    savefig("../Figures/Figure5b_TFP.pdf")
+    println("[Figure 5] Saved Figure5b_TFP.pdf")
 
-    # --- Capital (Figure12b) ---
+    # --- Capital (Figure 5(c)) ---
     cap_corr_open    = capital_demand_open_CM_open_trade[1] / capital_supply_future_open_CMdelayed_open_trade[1,end]
     cap_corr_closed  = capital_demand_closed_CM_open_trade[1] / capital_supply_future_closed_CM_open_trade[1,end]
     cap_corr_delayed = capital_demand_open_CM_open_trade[1] / capital_supply_future_open_CMdelayed_open_trade[1,end-1]
@@ -2358,10 +2371,10 @@ let
     plot([range(1991,2022)], [cap_smooth_open, cap_smooth_closed, cap_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-10,40])
-    savefig("../Figures/Figure12b.pdf")
-    println("[fig:Figure12] Saved Figure12b.pdf")
+    savefig("../Figures/Figure5c_capital.pdf")
+    println("[Figure 5] Saved Figure5c_capital.pdf")
 
-    # --- Consumption (Figure12c) ---
+    # --- Consumption (Figure 5(a)) ---
     con_corr_open    = total_consumption_open_CM_open_trade[1] / total_consumption_store_open_CM_open_trade[1,end]
     con_corr_closed  = total_consumption_closed_CM_open_trade[1] / total_consumption_store_closed_CM_open_trade[1,end]
     con_corr_delayed = total_consumption_open_CM_open_trade[1] / total_consumption_store_open_CMdelayed_open_trade[1,end-1]
@@ -2371,10 +2384,10 @@ let
     plot([range(1991,2020)], [con_smooth_open, con_smooth_closed, con_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0,10])
-    savefig("../Figures/Figure12c.pdf")
-    println("[fig:Figure12] Saved Figure12c.pdf")
+    savefig("../Figures/Figure5a_consumption.pdf")
+    println("[Figure 5] Saved Figure5a_consumption.pdf")
 
-    # --- Exporters pop (Figure12d) ---
+    # --- Exporters pop (Figure 5(d)) ---
     exp_corr_open    = exporter_pop_open_CM_open_trade[1] / exporter_pop_store_open_CM_open_trade[1,end]
     exp_corr_closed  = exporter_pop_closed_CM_open_trade[1] / exporter_pop_store_closed_CM_open_trade[1,end]
     exp_corr_delayed = exporter_pop_open_CM_open_trade[1] / exporter_pop_store_open_CMdelayed_open_trade[1,end-1]
@@ -2384,10 +2397,10 @@ let
     plot([range(1991,2020)], [exp_smooth_open, exp_smooth_closed, exp_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.0,45])
-    savefig("../Figures/Figure12d.pdf")
-    println("[fig:Figure12] Saved Figure12d.pdf")
+    savefig("../Figures/Figure5d_exporters.pdf")
+    println("[Figure 5] Saved Figure5d_exporters.pdf")
 
-    # --- Domestic pop (Figure12e) ---
+    # --- Domestic pop (Figure 5(e)) ---
     dom_corr_open    = domestic_pop_open_CM_open_trade[1] / domestic_pop_store_open_CM_open_trade[1,end]
     dom_corr_closed  = domestic_pop_closed_CM_open_trade[1] / domestic_pop_store_closed_CM_open_trade[1,end]
     dom_corr_delayed = domestic_pop_open_CM_open_trade[1] / domestic_pop_store_open_CMdelayed_open_trade[1,end-1]
@@ -2397,20 +2410,20 @@ let
     plot([range(1991,2020)], [dom_smooth_open, dom_smooth_closed, dom_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-30.0,10])
-    savefig("../Figures/Figure12e.pdf")
-    println("[fig:Figure12] Saved Figure12e.pdf")
+    savefig("../Figures/Figure5e_nonexporters.pdf")
+    println("[Figure 5] Saved Figure5e_nonexporters.pdf")
 
-    # --- Exporter share (Figure12f) ---
+    # --- Exporter share (Figure 5(f)) ---
     share_open    = movmean(exporter_pop_store_open_CM_open_trade[1,:] ./ (exporter_pop_store_open_CM_open_trade[1,:] .+ domestic_pop_store_open_CM_open_trade[1,:]), 5)
     share_closed  = movmean(exporter_pop_store_closed_CM_open_trade[1,:] ./ (exporter_pop_store_closed_CM_open_trade[1,:] .+ domestic_pop_store_closed_CM_open_trade[1,:]), 5)
     share_delayed = movmean(exporter_pop_store_open_CMdelayed_open_trade[1,:] ./ (exporter_pop_store_open_CMdelayed_open_trade[1,:] .+ domestic_pop_store_open_CMdelayed_open_trade[1,:]), 5)
     plot([range(1991,2020)], 100 .* [share_open, share_closed, share_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[30,50])
-    savefig("../Figures/Figure12f.pdf")
-    println("[fig:Figure12] Saved Figure12f.pdf")
+    savefig("../Figures/Figure5f_share_of_exporter_firms.pdf")
+    println("[Figure 5] Saved Figure5f_share_of_exporter_firms.pdf")
 
-    # --- Capital per exporter (Figure12g) ---
+    # --- Capital per exporter (Figure 5(g)) ---
     Kx_init_per_exp = K_x_initial[1] / exporter_pop_initial[1]
     Kxcorr_open    = K_x_open_CM_open_trade[1]/exporter_pop_open_CM_open_trade[1] * exporter_pop_store_open_CM_open_trade[1,end-1] / (K_x_ratio_store_open_CM_open_trade[1,end] * capital_supply_future_open_CM_open_trade[1,end])
     Kxcorr_closed  = K_x_closed_CM_open_trade[1]/exporter_pop_closed_CM_open_trade[1] * exporter_pop_store_closed_CM_open_trade[1,end-1] / (K_x_ratio_store_closed_CM_open_trade[1,end] * capital_supply_future_closed_CM_open_trade[1,end])
@@ -2421,10 +2434,10 @@ let
     plot([range(1991,2020)], [Kx_smooth_open, Kx_smooth_closed, Kx_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-20.0,40])
-    savefig("../Figures/Figure12g.pdf")
-    println("[fig:Figure12] Saved Figure12g.pdf")
+    savefig("../Figures/Figure5g_capital_per_exporter.pdf")
+    println("[Figure 5] Saved Figure5g_capital_per_exporter.pdf")
 
-    # --- Capital per non-exporter (Figure12h) ---
+    # --- Capital per non-exporter (Figure 5(h)) ---
     Kd_init_per_dom = K_d_initial[1] / domestic_pop_initial[1]
     Kdcorr_open    = K_d_open_CM_open_trade[1]/domestic_pop_open_CM_open_trade[1] * domestic_pop_store_open_CM_open_trade[1,end-1] / (K_d_ratio_store_open_CM_open_trade[1,end] * capital_supply_future_open_CM_open_trade[1,end])
     Kdcorr_closed  = K_d_closed_CM_open_trade[1]/domestic_pop_closed_CM_open_trade[1] * domestic_pop_store_closed_CM_open_trade[1,end-1] / (K_d_ratio_store_closed_CM_open_trade[1,end] * capital_supply_future_closed_CM_open_trade[1,end])
@@ -2435,20 +2448,20 @@ let
     plot([range(1991,2020)], [Kd_smooth_open, Kd_smooth_closed, Kd_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-20.0,20])
-    savefig("../Figures/Figure12h.pdf")
-    println("[fig:Figure12] Saved Figure12h.pdf")
+    savefig("../Figures/Figure5h_capital_per_nonexporter.pdf")
+    println("[Figure 5] Saved Figure5h_capital_per_nonexporter.pdf")
 
-    # --- Capital share of exporters (Figure12i) ---
+    # --- Capital share of exporters (Figure 5(i)) ---
     Kshare_open    = movmean(100 .* K_x_ratio_store_open_CM_open_trade[1,1:end], 5)
     Kshare_closed  = movmean(100 .* K_x_ratio_store_closed_CM_open_trade[1,1:end], 5)
     Kshare_delayed = movmean(100 .* K_x_ratio_store_open_CMdelayed_open_trade[1,1:end], 5)
     plot([range(1991,2020)], [Kshare_open, Kshare_closed, Kshare_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[45,80])
-    savefig("../Figures/Figure12i.pdf")
-    println("[fig:Figure12] Saved Figure12i.pdf")
+    savefig("../Figures/Figure5i_capital_share_of_exporters.pdf")
+    println("[Figure 5] Saved Figure5i_capital_share_of_exporters.pdf")
 
-    # --- s.d. ARPK all (Figure12k) ---
+    # --- s.d. ARPK all (Figure 5(j)) ---
     sdMRPK_corr_open    = sd_MRPK_open_CM_open_trade[1] / sd_MRPK_store_open_CM_open_trade[1,end]
     sdMRPK_corr_closed  = sd_MRPK_closed_CM_open_trade[1] / sd_MRPK_store_closed_CM_open_trade[1,end]
     sdMRPK_corr_delayed = sd_MRPK_open_CM_open_trade[1] / sd_MRPK_store_open_CMdelayed_open_trade[1,end-1]
@@ -2458,10 +2471,10 @@ let
     plot([range(1991,2020)], [sdMRPK_smooth_open, sdMRPK_smooth_closed, sdMRPK_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.3,0.55])
-    savefig("../Figures/Figure12k.pdf")
-    println("[fig:Figure12] Saved Figure12k.pdf")
+    savefig("../Figures/Figure5j_sd_ARPK.pdf")
+    println("[Figure 5] Saved Figure5j_sd_ARPK.pdf")
 
-    # --- s.d. ARPK domestic (Figure12l) ---
+    # --- s.d. ARPK domestic (Figure 5(k)) ---
     sdMRPKd_corr_open    = sd_MRPK_d_open_CM_open_trade[1] / sd_MRPK_d_store_open_CM_open_trade[1,end]
     sdMRPKd_corr_closed  = sd_MRPK_d_closed_CM_open_trade[1] / sd_MRPK_d_store_closed_CM_open_trade[1,end]
     sdMRPKd_corr_delayed = sd_MRPK_d_open_CM_open_trade[1] / sd_MRPK_d_store_open_CMdelayed_open_trade[1,end-1]
@@ -2471,29 +2484,31 @@ let
     plot([range(1991,2020)], [sdMRPKd_smooth_open, sdMRPKd_smooth_closed, sdMRPKd_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.32,0.55])
-    savefig("../Figures/Figure12l.pdf")
-    println("[fig:Figure12] Saved Figure12l.pdf")
+    savefig("../Figures/Figure5k_nonexporter_sd_ARPK.pdf")
+    println("[Figure 5] Saved Figure5k_nonexporter_sd_ARPK.pdf")
 
-    # --- s.d. ARPK exporter (Figure12m) ---
+    # --- s.d. ARPK exporter (Figure 5(l)) ---
     sdMRPKx_corr_open    = sd_MRPK_x_open_CM_open_trade[1] / sd_MRPK_x_store_open_CM_open_trade[1,end]
     sdMRPKx_corr_closed  = sd_MRPK_x_closed_CM_open_trade[1] / sd_MRPK_x_store_closed_CM_open_trade[1,end]
     sdMRPKx_corr_delayed = sd_MRPK_x_open_CM_open_trade[1] / sd_MRPK_x_store_open_CMdelayed_open_trade[1,end-1]
     sdMRPKx_smooth_open    = movmean(sdMRPKx_corr_open    .* sd_MRPK_x_store_open_CM_open_trade[1,:], 5)
     sdMRPKx_smooth_closed  = movmean(sdMRPKx_corr_closed  .* sd_MRPK_x_store_closed_CM_open_trade[1,:], 5)
     sdMRPKx_smooth_delayed = movmean(sdMRPKx_corr_delayed .* sd_MRPK_x_store_open_CMdelayed_open_trade[1,:], 5)
-    # Note: plot.jl uses sdMRPKd_smooth_delayed (domestic) for the delayed line in Figure12m
+    # Note: plot.jl uses sdMRPKd_smooth_delayed (domestic) for the delayed line in Figure 5(l)
     plot([range(1991,2020)], [sdMRPKx_smooth_open, sdMRPKx_smooth_closed, sdMRPKd_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.25,0.55])
-    savefig("../Figures/Figure12m.pdf")
-    println("[fig:Figure12] Saved Figure12m.pdf")
+    savefig("../Figures/Figure5l_exporter_sd_ARPK.pdf")
+    println("[Figure 5] Saved Figure5l_exporter_sd_ARPK.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12c]  DiD simulation — incumbent exporters by wealth quartile
+# [Figure 6]  DiD simulation — incumbent exporters by wealth quartile
 # main.tex: \label{fig:Figure12c}
-# Figures: Figure12q (above/below median wealth, immediate integration)
-#          Figure12r (above/below median wealth, delayed integration)
+# Outputs: ../Figures/Figure6a_adjusted_to_trade_liberalization.pdf
+#            (a) above/below median wealth, immediate integration
+#          ../Figures/Figure6b_10_years_after_trade_liberalization.pdf
+#            (b) above/below median wealth, delayed integration
 # Source: plot.jl lines 288–392
 # Note: requires current_*_mat distributions and K_x_ratio_store_open_CM_open_trade_initial
 #       from transition case 0 (open_CM_open_trade_initial).
@@ -2539,10 +2554,10 @@ let
          legend=(0.1,0.9), label=["Above median wealth" "Below median wealth"],
          legendfont=font(14), linewidth=3, linestyle=[:solid :dash],
          grid=false, tickfontsize=14, ylims=[0.0,50])
-    savefig("../Figures/Figure12q.pdf")
-    println("[fig:Figure12c] Saved Figure12q.pdf")
+    savefig("../Figures/Figure6a_adjusted_to_trade_liberalization.pdf")
+    println("[Figure 6] Saved Figure6a_adjusted_to_trade_liberalization.pdf")
 
-    # Delayed integration version (Figure12r)
+    # Delayed integration version (Figure 6(b))
     cap_inc_trans_med_del  = cap_share_median  .* K_x_ratio_store_open_CMdelayed_open_trade[1,:] .* capital_supply_future_open_CMdelayed_open_trade[1,2:(end-1)]
     cap_inc_trans_bmed_del = cap_share_bmedian .* K_x_ratio_store_open_CMdelayed_open_trade[1,:] .* capital_supply_future_open_CMdelayed_open_trade[1,2:(end-1)]
     K_x_med_del  = 100 .* (cap_inc_trans_med_del  ./ cap_inc_trans_med_del[T_cap]  .- 1)
@@ -2550,20 +2565,20 @@ let
     plot([range(2001,2008)], [K_x_med_del[T_cap:(T_cap+7)], K_x_bmed_del[T_cap:(T_cap+7)]],
          legend=nothing, linewidth=3, linestyle=[:solid :dash],
          grid=false, tickfontsize=14, ylims=[-20.0,25])
-    savefig("../Figures/Figure12r.pdf")
-    println("[fig:Figure12c] Saved Figure12r.pdf")
+    savefig("../Figures/Figure6b_10_years_after_trade_liberalization.pdf")
+    println("[Figure 6] Saved Figure6b_10_years_after_trade_liberalization.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12b]  Transition dynamics — top 10% distributional shares
+# [Figure 17]  Transition dynamics — top 10% distributional shares
 # main.tex: \label{fig:Figure12b}
-# Figures: Figure12n (top 10% wealth share)
-#          Figure12o (top 10% income share)
-#          Figure12p (top 10% consumption share)
+# Outputs: ../Figures/Figure17a_top10_wealth_share.pdf       ((a) top 10% wealth share)
+#          ../Figures/Figure17b_top10_income_share.pdf       ((b) top 10% income share)
+#          ../Figures/Figure17c_top10_consumption_share.pdf  ((c) top 10% consumption share)
 # Source: plot.jl lines 912–944
 # =============================================================================
 let
-    # Figure12n — p90 wealth share
+    # Figure 17(a) — p90 wealth share
     pw_corr_open    = p90_wealth_open_CM_open_trade[1] / p90_wealth_store_open_CM_open_trade[1,end]
     pw_corr_closed  = p90_wealth_closed_CM_open_trade[1] / p90_wealth_store_closed_CM_open_trade[1,end]
     pw_corr_delayed = p90_wealth_open_CM_open_trade[1] / p90_wealth_store_open_CMdelayed_open_trade[1,end-1]
@@ -2573,10 +2588,10 @@ let
     plot(100 .* [pw_smooth_open, pw_smooth_closed, pw_smooth_delayed],
          legend=nothing, linewidth=3, linestyle=[:solid :dash :dot],
          grid=false, tickfontsize=14, ylims=[40,58])
-    savefig("../Figures/Figure12n.pdf")
-    println("[fig:Figure12b] Saved Figure12n.pdf")
+    savefig("../Figures/Figure17a_top10_wealth_share.pdf")
+    println("[Figure 17] Saved Figure17a_top10_wealth_share.pdf")
 
-    # Figure12o — p90 income share
+    # Figure 17(b) — p90 income share
     pi_corr_open    = p90_income_open_CM_open_trade[1] / p90_income_store_open_CM_open_trade[1,end]
     pi_corr_closed  = p90_income_closed_CM_open_trade[1] / p90_income_store_closed_CM_open_trade[1,end]
     pi_corr_delayed = p90_income_open_CM_open_trade[1] / p90_income_store_open_CMdelayed_open_trade[1,end-1]
@@ -2586,10 +2601,10 @@ let
     plot(100 .* [pi_smooth_open, pi_smooth_closed, pi_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot],
          grid=false, tickfontsize=14, ylims=[23,30])
-    savefig("../Figures/Figure12o.pdf")
-    println("[fig:Figure12b] Saved Figure12o.pdf")
+    savefig("../Figures/Figure17b_top10_income_share.pdf")
+    println("[Figure 17] Saved Figure17b_top10_income_share.pdf")
 
-    # Figure12p — p90 consumption share
+    # Figure 17(c) — p90 consumption share
     pc_corr_open    = p90_cons_open_CM_open_trade[1] / p90_cons_store_open_CM_open_trade[1,end]
     pc_corr_closed  = p90_cons_closed_CM_open_trade[1] / p90_cons_store_closed_CM_open_trade[1,end]
     pc_corr_delayed = p90_cons_open_CM_open_trade[1] / p90_cons_store_open_CMdelayed_open_trade[1,end-1]
@@ -2599,22 +2614,27 @@ let
     plot(100 .* [pc_smooth_open, pc_smooth_closed, pc_smooth_delayed],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot],
          grid=false, tickfontsize=14, ylims=[15,25])
-    savefig("../Figures/Figure12p.pdf")
-    println("[fig:Figure12b] Saved Figure12p.pdf")
+    savefig("../Figures/Figure17c_top10_consumption_share.pdf")
+    println("[Figure 17] Saved Figure17c_top10_consumption_share.pdf")
 end
 
 # =============================================================================
-# [fig:welfare]  Consumption-equivalent welfare contour maps
+# [Figure 16]  Consumption-equivalent welfare contour maps
 # main.tex: \label{fig:welfare}
-# Figures: Figure9a  (domestic producers, open CM, Blues)   — labeled "Workers" in paper
-#          Figure9b  (domestic producers, closed CM, Oranges)
-#          Figure10a (exporters, open CM, Blues)
-#          Figure10b (exporters, closed CM, Oranges)
-#          Figure11a (workers, open-closed CM difference, Blues)
-#          Figure11c (exporters, open-closed CM difference, Blues)
+# Panels carry no letter in the paper: top row = exporters, bottom row =
+# "Workers"; columns = integrated CM, closed CM, integrated vs. closed.
+# Outputs: ../Figures/Figure16_exporters_integratedCM.pdf          (top left,      Blues)
+#          ../Figures/Figure16_exporters_closedCM.pdf              (top middle,    Oranges)
+#          ../Figures/Figure16_exporters_integrated_vs_closed.pdf  (top right,     Blues)
+#          ../Figures/Figure16_workers_integratedCM.pdf            (bottom left,   Blues)
+#          ../Figures/Figure16_workers_closedCM.pdf                (bottom middle, Oranges)
+#          ../Figures/Figure16_workers_integrated_vs_closed.pdf    (bottom right,  Blues)
+# The bottom-left and bottom-middle panels plot domestic producers, which
+# the paper shows in the "Workers" row (they are affected like workers).
 # Source: plot.jl lines 947–996
-# Note: Figure8a/8b (workers absolute welfare) not in main.tex — omitted.
-#       Figure11b (domestic producers difference) not in main.tex — omitted.
+# Note: the legacy plot.jl also drew the workers' absolute welfare maps and
+#       the domestic producers' difference map; they are not in the paper
+#       and are not produced.
 # =============================================================================
 let
     β = Baseline_parameter.β[1]
@@ -2622,70 +2642,72 @@ let
     # --- open_CM_open_trade vs initial ---
     y_pop_open = exp.((V_trans_open_CM_open_trade .- V_saved_initial) .* (1.0 - β)) .- 1
 
-    # Figure9a — domestic producers, open CM (labeled "Workers" in paper)
+    # Figure 16, bottom left — domestic producers, open CM (row labeled "Workers" in paper)
     y_mat = mat_creator(100.0 .* y_pop_open[7201:14400])
     contourf(y_mat', levels=5, c=cgrad(:Blues_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=18, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure9a.pdf")
-    println("[fig:welfare] Saved Figure9a.pdf")
+    savefig("../Figures/Figure16_workers_integratedCM.pdf")
+    println("[Figure 16] Saved Figure16_workers_integratedCM.pdf")
 
-    # Figure10a — exporters, open CM
+    # Figure 16, top left — exporters, open CM
     y_mat = mat_creator(100.0 .* y_pop_open[14401:end])
     contourf(y_mat', levels=5, c=cgrad(:Blues_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=18, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure10a.pdf")
-    println("[fig:welfare] Saved Figure10a.pdf")
+    savefig("../Figures/Figure16_exporters_integratedCM.pdf")
+    println("[Figure 16] Saved Figure16_exporters_integratedCM.pdf")
 
     # --- closed_CM_open_trade vs initial ---
     y_pop_closed = exp.((V_trans_closed_CM_open_trade .- V_saved_initial) .* (1.0 - β)) .- 1
 
-    # Figure9b — domestic producers, closed CM
+    # Figure 16, bottom middle — domestic producers, closed CM
     y_mat = mat_creator(100.0 .* y_pop_closed[7201:14400])
     contourf(y_mat', levels=5, c=cgrad(:Oranges_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=18, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure9b.pdf")
-    println("[fig:welfare] Saved Figure9b.pdf")
+    savefig("../Figures/Figure16_workers_closedCM.pdf")
+    println("[Figure 16] Saved Figure16_workers_closedCM.pdf")
 
-    # Figure10b — exporters, closed CM
+    # Figure 16, top middle — exporters, closed CM
     y_mat = mat_creator(100.0 .* y_pop_closed[14401:end])
     contourf(y_mat', levels=5, c=cgrad(:Oranges_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=18, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure10b.pdf")
-    println("[fig:welfare] Saved Figure10b.pdf")
+    savefig("../Figures/Figure16_exporters_closedCM.pdf")
+    println("[Figure 16] Saved Figure16_exporters_closedCM.pdf")
 
     # --- open_CM vs closed_CM difference ---
     y_pop_diff = exp.((V_trans_open_CM_open_trade .- V_trans_closed_CM_open_trade) .* (1.0 - β)) .- 1
 
-    # Figure11a — workers (1:7200), open-vs-closed difference
+    # Figure 16, bottom right — workers (1:7200), open-vs-closed difference
     y_mat = mat_creator(100.0 .* y_pop_diff[1:7200])
     contourf(y_mat', levels=5, c=cgrad(:Blues_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             tickfontsize=18, xguidefontsize=18, yguidefontsize=18,
             legendfontsize=18)
-    savefig("../Figures/Figure11a.pdf")
-    println("[fig:welfare] Saved Figure11a.pdf")
+    savefig("../Figures/Figure16_workers_integrated_vs_closed.pdf")
+    println("[Figure 16] Saved Figure16_workers_integrated_vs_closed.pdf")
 
-    # Figure11c — exporters, open-vs-closed difference
+    # Figure 16, top right — exporters, open-vs-closed difference
     y_mat = mat_creator(100.0 .* y_pop_diff[14401:end])
     contourf(y_mat', levels=5, c=cgrad(:Blues_6, categorical=true, rev=true),
             xlabel="Productivity", ylabel="Wealth", axis=nothing, lw=0,
             colorbar_tickfontsize=40, colorbar_titlefontsize=40,
             guidefontsize=18, legendfontsize=18, titlefontsize=30,
             fontfamily="Computer Modern")
-    savefig("../Figures/Figure11c.pdf")
-    println("[fig:welfare] Saved Figure11c.pdf")
+    savefig("../Figures/Figure16_exporters_integrated_vs_closed.pdf")
+    println("[Figure 16] Saved Figure16_exporters_integrated_vs_closed.pdf")
 end
 
 # =============================================================================
-# [voting]  Majority voting on capital market reforms — Table_voting.tex
+# [Table 21]  Majority voting on capital market reforms
+# Output: ../Tables/Table21.tex
+# main.tex: \label{table:Table_voting}
 # Three scenarios, all from the household's perspective at the start of each SS:
 #   (1) Full integration  (open CM + trade)  vs initial SS  — signal: V_trans_open_CM - V_init
 #   (2) Trade only        (closed CM + trade) vs initial SS  — signal: V_trans_closed_CM - V_init
@@ -2767,14 +2789,15 @@ $tot
 \\parbox{0.95\\textwidth}{\\caption*{\\scriptsize \\textit{Note:} \$M^{yes}\$ is the fraction of households within each occupation whose transition-path value function is strictly higher under the reform than under the status quo: \$M^{yes}_g = \\int_g \\mathbf{1}[V^{\\text{reform}}(a,z,s) > V^{\\text{status quo}}(a,z,s)]\\,d\\mu / \\int_g d\\mu\$. The status quo for columns 1--2 is the pre-reform (initial) steady state; for column 3 it is the trade-only (closed capital markets) steady state. Avg.\\ CEV is the population-weighted average consumption-equivalent welfare change within each occupation, in percent. Cross-check: aggregate Avg.\\ CEV in the Total row equals 13.1\\%, 4.6\\%, and 6.2\\% for columns 1--3 respectively.}}
 \\end{table}
 """
-    open("../Tables/Table_voting.tex", "w") do io
+    open("../Tables/Table21.tex", "w") do io
         write(io, tex)
     end
-    println("\n  Saved → ../Tables/Table_voting.tex")
+    println("\n  Saved → ../Tables/Table21.tex")
 end
 
 # =============================================================================
-# [table:Table8]  Welfare change following external reforms  (inline → file)
+# [Table 22]  Welfare change following external reforms  (inline → file)
+# Output: ../Tables/Table22.tex
 # main.tex: \label{table:Table8}
 # Source: plot.jl lines 888–906 (table_8_results 17×3)
 # All welfare values are percentages (×100 of decimal CEV).
@@ -2857,15 +2880,15 @@ External Reforms & 103 & 60 & 0  \\\\
 \\parbox{0.65\\textwidth}{\\caption*{\\scriptsize \\textit{Note:}  Compared to the pre-reform economy, different welfare measures change across different steady states. Utilitarian welfare change is the average consumption bundle required for individual households to achieve the same utility in the initial steady state. Asterisks denote Core moments, and square brackets indicate a ten-year delay in implementing capital markets. The EU-wide welfare change accounts for the transition path and refers to joint, population-weighted, NMS and Core welfare.}}
 \\end{table}
 """
-    open("../Tables/Table8.tex", "w") do io
+    open("../Tables/Table22.tex", "w") do io
         write(io, tex)
     end
-    println("[table:Table8] Saved → ../Tables/Table8.tex")
+    println("[Table 22] Saved → ../Tables/Table22.tex")
 end
 
 # =============================================================================
 # DEV ECONOMY WELFARE CALCULATIONS
-# Needed for Table_combined (Table10/11) and Table4b (Core economy).
+# Needed for Table 23 (both panels) and Table 24 (Core economy).
 # Source: plot_dev.jl lines 1–47, 1055–1079; plot.jl lines 1145–1211
 # Prerequisites: Step 5 (developed_steady_states.jl) + Step 2 (cases 6-7).
 # =============================================================================
@@ -3075,7 +3098,8 @@ foreign_credit_share_open_CM_closed_trade =
 println("Dev welfare and credit calculations done.")
 
 # =============================================================================
-# [table:Table9]  Standalone capital market integration  (computed)
+# [Table 20]  Standalone capital market integration  (computed)
+# Output: ../Tables/Table20.tex
 # main.tex: \label{table:Table9}
 # Source: plot.jl lines 1119–1141
 # Columns: None (initial), Capital (open_CM_closed_trade), Trade+cap (open_CM_open_trade)
@@ -3132,7 +3156,7 @@ let
     r[18,:] = [foreign_credit_share_initial, foreign_credit_share_open_CM_closed_trade,
                foreign_credit_share_open_CM_open_trade]
 
-    println("[table:Table9] table_9_results computed.")
+    println("[Table 20] table_9_results computed.")
     println(round.(100 .* r, digits=1))
 
     tex = """\\begin{table}[!t]
@@ -3171,18 +3195,21 @@ CPI & $(f0(r[16,1])) & $(f0(r[16,2])) & $(f0(r[16,3])) \\\\
 \\end{tabular}}
 \\end{table}
 """
-    open("../Tables/Table9.tex", "w") do io
+    open("../Tables/Table20.tex", "w") do io
         write(io, tex)
     end
-    println("[table:Table9] Saved → ../Tables/Table9.tex")
+    println("[Table 20] Saved → ../Tables/Table20.tex")
 end
 
 # =============================================================================
-# [table:combined]  Financial development and external reforms  (computed)
+# [Table 23]  Financial development and external reforms  (computed)
+# Output: ../Tables/Table23.tex  (one table with two panels)
 # main.tex: \label{table:combined}
 # Source: plot.jl lines 1145–1211; plot_dev.jl tables
-# Table10: NMS Low (initial) vs High (initial_dev) financial development
-# Table11: Reforms in the high-financial-development economy (3 scenarios)
+# Panel "Effects of financial development" (\label{table:Table10}):
+#   NMS Low (initial) vs High (initial_dev) financial development
+# Panel "Reforms & high financial development" (\label{table:Table11}):
+#   Reforms in the high-financial-development economy (3 scenarios)
 # =============================================================================
 let
     f0(x)  = @sprintf("%.0f", round(round(round(x * 100, digits=2, RoundNearestTiesAway), digits=1, RoundNearestTiesAway), digits=0, RoundNearestTiesAway))
@@ -3190,7 +3217,7 @@ let
     f2(x)  = @sprintf("%.2f", round(x, digits=2, RoundNearestTiesAway))        # sd_MRPK as-is
     fip(x) = @sprintf("%.0f", round(round(round(x * 100, digits=2, RoundNearestTiesAway), digits=1, RoundNearestTiesAway), digits=0, RoundNearestTiesAway))  # interest rate
 
-    # ── Table10 ────────────────────────────────────────────────────────────────
+    # ── Table 23, panel "Effects of financial development" ────────────────────────────────────────────────────────────────
     t10 = zeros(20, 2)
     t10[1,:]  = [1.0, TFP_initial_dev[1] / TFP_initial[1]]
     t10[2,:]  = [sd_MRPK_initial[1], sd_MRPK_initial_dev[1]]
@@ -3220,7 +3247,7 @@ let
     t10[18,:] = [total_credit_initial, total_credit_initial_dev]
     t10[19,:] = [foreign_credit_share_initial, foreign_credit_share_initial_dev]
 
-    # ── Table11 ────────────────────────────────────────────────────────────────
+    # ── Table 23, panel "Reforms & high financial development" ────────────────────────────────────────────────────────────────
     t11 = zeros(21, 3)
     t11[1,:]  = [1.0,
                  TFP_closed_CM_open_trade_dev[1] / TFP_initial_dev[1],
@@ -3279,7 +3306,7 @@ let
     t11[21,:] = [foreign_credit_share_initial_dev, foreign_credit_share_closed_CM_open_trade_dev,
                  foreign_credit_share_open_CM_open_trade_dev]
 
-    println("[table:combined] table_10_results and table_11_results computed.")
+    println("[Table 23] table_10_results and table_11_results computed.")
 
     tex = """\\begin{table}[!t]
 \\centering
@@ -3366,14 +3393,15 @@ RER & $(f0(t11[19,1])) & $(f0(t11[19,2])) & $(f0(t11[19,3])) \\\\
 \\end{minipage}
 \\end{table}
 """
-    open("../Tables/Table_combined.tex", "w") do io
+    open("../Tables/Table23.tex", "w") do io
         write(io, tex)
     end
-    println("[table:combined] Saved → ../Tables/Table_combined.tex")
+    println("[Table 23] Saved → ../Tables/Table23.tex")
 end
 
 # =============================================================================
-# [table:Table4b]  Effect of reforms on the Core economy  (computed)
+# [Table 24]  Effect of reforms on the Core economy  (computed)
+# Output: ../Tables/Table24.tex
 # main.tex: \label{table:Table4b}
 # Source: plot_dev.jl lines 234–345  (table_12_results, 26×8)
 # Columns: None, Trade, Trade+cap, Capital, Development, Trade(dev), Trade+cap(dev)
@@ -3555,7 +3583,7 @@ let
                Misallocation_within_x_initial_dev[2], Misallocation_within_x_closed_CM_open_trade_dev[2],
                Misallocation_within_x_open_CM_open_trade_dev[2]]
 
-    println("[table:Table4b] table_12_results computed.")
+    println("[Table 24] table_12_results computed.")
     println(round.(100 .* r, digits=1))
 
     # CE welfare col 3 gets asterisk (delayed-10yr footnote in original)
@@ -3607,14 +3635,15 @@ Share of exporters & $(f0(r[18,1])) & $(f0(r[18,2])) & $(f0(r[18,3])) & $(f0(r[1
 \\parbox{0.85\\textwidth}{\\caption*{\\scriptsize \\textit{Note:}  Postponing by 10 years increases gains by \$0.1 \\%\$. The last two columns are relative to the ``Development'' steady state. Except for EU welfare, all variables refer to the Core economy.}}
 \\end{table}
 """
-    open("../Tables/Table4b.tex", "w") do io
+    open("../Tables/Table24.tex", "w") do io
         write(io, tex)
     end
-    println("[table:Table4b] Saved → ../Tables/Table4b.tex")
+    println("[Table 24] Saved → ../Tables/Table24.tex")
 end
 
 # =============================================================================
-# [table:Table_asym]  Symmetric vs asymmetric trade liberalization welfare (computed)
+# [Table 25]  Symmetric vs asymmetric trade liberalization welfare (computed)
+# Output: ../Tables/Table25.tex
 # main.tex: \label{table:Table_asym}
 # Source: plot_asym.jl lines 1–58
 # Columns: Closed (trade only), Integrated (full), Delayed integration
@@ -3662,7 +3691,7 @@ let
 
     f1(x) = @sprintf("%.1f", round(round(x * 100, digits=2, RoundNearestTiesAway), digits=1, RoundNearestTiesAway))
 
-    println("[table:Table_asym] Welfare values:")
+    println("[Table 25] Welfare values:")
     println("  NMS sym:  ", round.([welfare_change_clCM_otrade_trans, welfare_change_oCM_otrade_trans, welfare_change_oCM_otrade_delayed10_trans] .* 100, digits=1))
     println("  NMS asym: ", round.([welf_NMS_asym_cl, welf_NMS_asym_op, welf_NMS_asym_del] .* 100, digits=1))
     println("  Core sym: ", round.([welfare_change_clCM_otrade_trans_F, welfare_change_oCM_otrade_trans_F, welfare_change_oCM_otrade_delayed10_trans_F] .* 100, digits=1))
@@ -3687,22 +3716,24 @@ let
 }
 \\end{table}
 """
-    open("../Tables/Table_asym.tex", "w") do io
+    open("../Tables/Table25.tex", "w") do io
         write(io, tex)
     end
-    println("[table:Table_asym] Saved → ../Tables/Table_asym.tex")
+    println("[Table 25] Saved → ../Tables/Table25.tex")
 end
 
 # =============================================================================
-# [fig:Figure12_cons]  Transition dynamics of consumption — symmetric + asymmetric
+# [Figure 18]  Transition dynamics of consumption — symmetric + asymmetric
 # main.tex: \label{fig:Figure12_cons}
-# Figures: Figure12c.pdf  (already saved in [fig:Figure12] above)
-#          Figure12c_asym.pdf  (from asymmetric liberalization, Step 2c)
+# Outputs: ../Figures/Figure18a_consumption_symmetric.pdf   ((a) same panel as Figure 5(a), copied)
+#          ../Figures/Figure18b_consumption_asymmetric.pdf  ((b) asymmetric liberalization, Step 3c)
 # Source: plot_asym.jl lines 106–116
 # =============================================================================
 let
-    # Figure12c already saved above ([fig:Figure12]).
-    # Figure12c_asym:
+    # Figure 18(a) is Figure 5(a), saved above; copy it under its own name.
+    cp("../Figures/Figure5a_consumption.pdf", "../Figures/Figure18a_consumption_symmetric.pdf"; force=true)
+    println("[Figure 18] Saved Figure18a_consumption_symmetric.pdf (copy of Figure5a_consumption.pdf)")
+    # Figure 18(b):
     con_corr_open_a    = total_consumption_open_CM_open_trade[1] / total_consumption_store_open_CM_open_trade_asym[1,end]
     con_corr_closed_a  = total_consumption_closed_CM_open_trade[1] / total_consumption_store_closed_CM_open_trade_asym[1,end]
     con_corr_delayed_a = total_consumption_open_CM_open_trade[1] / total_consumption_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3712,20 +3743,22 @@ let
     plot([range(1991,2020)], [con_smooth_open_a, con_smooth_closed_a, con_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0,10])
-    savefig("../Figures/Figure12c_asym.pdf")
-    println("[fig:Figure12_cons] Saved Figure12c_asym.pdf")
+    savefig("../Figures/Figure18b_consumption_asymmetric.pdf")
+    println("[Figure 18] Saved Figure18b_consumption_asymmetric.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12_TFP]  Transition dynamics of TFP — symmetric + asymmetric
+# [Figure 19]  Transition dynamics of TFP — symmetric + asymmetric
 # main.tex: \label{fig:Figure12_TFP}
-# Figures: Figure12a.pdf  (already saved in [fig:Figure12] above)
-#          Figure12a_asym.pdf  (from asymmetric liberalization, Step 2c)
+# Outputs: ../Figures/Figure19a_TFP_symmetric.pdf   ((a) same panel as Figure 5(b), copied)
+#          ../Figures/Figure19b_TFP_asymmetric.pdf  ((b) asymmetric liberalization, Step 3c)
 # Source: plot_asym.jl lines 78–89
 # =============================================================================
 let
-    # Figure12a already saved above.
-    # Figure12a_asym:
+    # Figure 19(a) is Figure 5(b), saved above; copy it under its own name.
+    cp("../Figures/Figure5b_TFP.pdf", "../Figures/Figure19a_TFP_symmetric.pdf"; force=true)
+    println("[Figure 19] Saved Figure19a_TFP_symmetric.pdf (copy of Figure5b_TFP.pdf)")
+    # Figure 19(b):
     TFP_corr_open_a    = TFP_open_CM_open_trade[1] / TFP_store_open_CM_open_trade_asym[1,end]
     TFP_corr_closed_a  = TFP_closed_CM_open_trade[1] / TFP_store_closed_CM_open_trade_asym[1,end-1]
     TFP_corr_delayed_a = TFP_open_CM_open_trade[1] / TFP_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3735,20 +3768,22 @@ let
     plot([range(1991,2020)], [TFP_smooth_open_a, TFP_smooth_closed_a, TFP_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0,35])
-    savefig("../Figures/Figure12a_asym.pdf")
-    println("[fig:Figure12_TFP] Saved Figure12a_asym.pdf")
+    savefig("../Figures/Figure19b_TFP_asymmetric.pdf")
+    println("[Figure 19] Saved Figure19b_TFP_asymmetric.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12_ARPK]  Transition dynamics of s.d. ARPK — symmetric + asymmetric
+# [Figure 20]  Transition dynamics of s.d. ARPK — symmetric + asymmetric
 # main.tex: \label{fig:Figure12_ARPK}
-# Figures: Figure12k.pdf  (already saved in [fig:Figure12] above)
-#          Figure12k_asym.pdf  (from asymmetric liberalization, Step 2c)
+# Outputs: ../Figures/Figure20a_sd_ARPK_symmetric.pdf   ((a) same panel as Figure 5(j), copied)
+#          ../Figures/Figure20b_sd_ARPK_asymmetric.pdf  ((b) asymmetric liberalization, Step 3c)
 # Source: plot_asym.jl lines 196–206
 # =============================================================================
 let
-    # Figure12k already saved above.
-    # Figure12k_asym:
+    # Figure 20(a) is Figure 5(j), saved above; copy it under its own name.
+    cp("../Figures/Figure5j_sd_ARPK.pdf", "../Figures/Figure20a_sd_ARPK_symmetric.pdf"; force=true)
+    println("[Figure 20] Saved Figure20a_sd_ARPK_symmetric.pdf (copy of Figure5j_sd_ARPK.pdf)")
+    # Figure 20(b):
     sdMRPK_corr_open_a    = sd_MRPK_open_CM_open_trade[1] / sd_MRPK_store_open_CM_open_trade_asym[1,end]
     sdMRPK_corr_closed_a  = sd_MRPK_closed_CM_open_trade[1] / sd_MRPK_store_closed_CM_open_trade_asym[1,end]
     sdMRPK_corr_delayed_a = sd_MRPK_open_CM_open_trade[1] / sd_MRPK_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3758,29 +3793,39 @@ let
     plot([range(1991,2020)], [sdMRPK_smooth_open_a, sdMRPK_smooth_closed_a, sdMRPK_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.3,0.55])
-    savefig("../Figures/Figure12k_asym.pdf")
-    println("[fig:Figure12_ARPK] Saved Figure12k_asym.pdf")
+    savefig("../Figures/Figure20b_sd_ARPK_asymmetric.pdf")
+    println("[Figure 20] Saved Figure20b_sd_ARPK_asymmetric.pdf")
 end
 
 # =============================================================================
-# [fig:Figure12_asym]  Full set of transition dynamics under asymmetric liberalization
+# [Figure 21]  Full set of transition dynamics under asymmetric liberalization
 # main.tex: \label{fig:Figure12_asym}
-# Figures: Figure12a_asym (TFP)           — already saved above
-#          Figure12b_asym (capital)
-#          Figure12c_asym (consumption)   — already saved above
-#          Figure12d_asym (exporters)
-#          Figure12e_asym (non-exporters)
-#          Figure12f_asym (exporter share)
-#          Figure12g_asym (K/exporter)
-#          Figure12h_asym (K/non-exporter)
-#          Figure12i_asym (capital share exporters)
-#          Figure12k_asym (s.d. ARPK all) — already saved above
-#          Figure12l_asym (s.d. ARPK domestic)
-#          Figure12m_asym (s.d. ARPK exporter)
+# Outputs (../Figures/, one file per panel, letter = panel in the paper):
+#   Figure21a_consumption.pdf               — same panel as Figure 18(b), copied
+#   Figure21b_TFP.pdf                       — same panel as Figure 19(b), copied
+#   Figure21c_capital.pdf
+#   Figure21d_exporters.pdf
+#   Figure21e_nonexporters.pdf
+#   Figure21f_share_of_exporter_firms.pdf
+#   Figure21g_capital_per_exporter.pdf
+#   Figure21h_capital_per_nonexporter.pdf
+#   Figure21i_capital_share_of_exporters.pdf
+#   Figure21j_sd_ARPK.pdf                   — same panel as Figure 20(b), copied
+#   Figure21k_nonexporter_sd_ARPK.pdf
+#   Figure21l_exporter_sd_ARPK.pdf
 # Source: plot_asym.jl lines 91–228
 # =============================================================================
 let
-    # Figure12b_asym — capital
+    # Panels (a), (b) and (j) were saved above as Figures 18(b), 19(b) and
+    # 20(b); copy them under their Figure 21 names.
+    for (src, dst) in [("Figure18b_consumption_asymmetric.pdf", "Figure21a_consumption.pdf"),
+                       ("Figure19b_TFP_asymmetric.pdf",         "Figure21b_TFP.pdf"),
+                       ("Figure20b_sd_ARPK_asymmetric.pdf",     "Figure21j_sd_ARPK.pdf")]
+        cp("../Figures/" * src, "../Figures/" * dst; force=true)
+        println("[Figure 21] Saved $dst (copy of $src)")
+    end
+
+    # Figure 21(c) — capital
     cap_corr_open_a    = capital_demand_open_CM_open_trade[1] / capital_supply_future_open_CM_open_trade_asym[1,end]
     cap_corr_closed_a  = capital_demand_closed_CM_open_trade[1] / capital_supply_future_closed_CM_open_trade_asym[1,end]
     cap_corr_delayed_a = capital_demand_open_CM_open_trade[1] / capital_supply_future_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3790,10 +3835,10 @@ let
     plot([range(1991,2022)], [cap_smooth_open_a, cap_smooth_closed_a, cap_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-10,40])
-    savefig("../Figures/Figure12b_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12b_asym.pdf")
+    savefig("../Figures/Figure21c_capital.pdf")
+    println("[Figure 21] Saved Figure21c_capital.pdf")
 
-    # Figure12d_asym — exporters
+    # Figure 21(d) — exporters
     exp_corr_open_a    = exporter_pop_open_CM_open_trade[1] / exporter_pop_store_open_CM_open_trade_asym[1,end]
     exp_corr_closed_a  = exporter_pop_closed_CM_open_trade[1] / exporter_pop_store_closed_CM_open_trade_asym[1,end]
     exp_corr_delayed_a = exporter_pop_open_CM_open_trade[1] / exporter_pop_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3803,10 +3848,10 @@ let
     plot([range(1991,2020)], [exp_smooth_open_a, exp_smooth_closed_a, exp_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.0,45])
-    savefig("../Figures/Figure12d_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12d_asym.pdf")
+    savefig("../Figures/Figure21d_exporters.pdf")
+    println("[Figure 21] Saved Figure21d_exporters.pdf")
 
-    # Figure12e_asym — non-exporters
+    # Figure 21(e) — non-exporters
     dom_corr_open_a    = domestic_pop_open_CM_open_trade[1] / domestic_pop_store_open_CM_open_trade_asym[1,end]
     dom_corr_closed_a  = domestic_pop_closed_CM_open_trade[1] / domestic_pop_store_closed_CM_open_trade_asym[1,end]
     dom_corr_delayed_a = domestic_pop_open_CM_open_trade[1] / domestic_pop_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3816,20 +3861,20 @@ let
     plot([range(1991,2020)], [dom_smooth_open_a, dom_smooth_closed_a, dom_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-30.0,30.0])
-    savefig("../Figures/Figure12e_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12e_asym.pdf")
+    savefig("../Figures/Figure21e_nonexporters.pdf")
+    println("[Figure 21] Saved Figure21e_nonexporters.pdf")
 
-    # Figure12f_asym — exporter share
+    # Figure 21(f) — exporter share
     share_open_a    = movmean(exporter_pop_store_open_CM_open_trade_asym[1,:] ./ (exporter_pop_store_open_CM_open_trade_asym[1,:] .+ domestic_pop_store_open_CM_open_trade_asym[1,:]), 5)
     share_closed_a  = movmean(exporter_pop_store_closed_CM_open_trade_asym[1,:] ./ (exporter_pop_store_closed_CM_open_trade_asym[1,:] .+ domestic_pop_store_closed_CM_open_trade_asym[1,:]), 5)
     share_delayed_a = movmean(exporter_pop_store_open_CMdelayed_open_trade_asym[1,:] ./ (exporter_pop_store_open_CMdelayed_open_trade_asym[1,:] .+ domestic_pop_store_open_CMdelayed_open_trade_asym[1,:]), 5)
     plot([range(1991,2020)], 100 .* [share_open_a, share_closed_a, share_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[30,50])
-    savefig("../Figures/Figure12f_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12f_asym.pdf")
+    savefig("../Figures/Figure21f_share_of_exporter_firms.pdf")
+    println("[Figure 21] Saved Figure21f_share_of_exporter_firms.pdf")
 
-    # Figure12g_asym — capital per exporter
+    # Figure 21(g) — capital per exporter
     Kx_init_per_exp = K_x_initial[1] / exporter_pop_initial[1]
     Kxcorr_open_a    = K_x_open_CM_open_trade[1]/exporter_pop_open_CM_open_trade[1] * exporter_pop_store_open_CM_open_trade_asym[1,end-1] / (K_x_ratio_store_open_CM_open_trade[1,end] * capital_supply_future_open_CM_open_trade[1,end])
     Kxcorr_closed_a  = K_x_closed_CM_open_trade[1]/exporter_pop_closed_CM_open_trade[1] * exporter_pop_store_closed_CM_open_trade_asym[1,end-1] / (K_x_ratio_store_closed_CM_open_trade[1,end] * capital_supply_future_closed_CM_open_trade[1,end])
@@ -3840,10 +3885,10 @@ let
     plot([range(1991,2020)], [Kx_smooth_open_a, Kx_smooth_closed_a, Kx_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-20.0,40])
-    savefig("../Figures/Figure12g_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12g_asym.pdf")
+    savefig("../Figures/Figure21g_capital_per_exporter.pdf")
+    println("[Figure 21] Saved Figure21g_capital_per_exporter.pdf")
 
-    # Figure12h_asym — capital per non-exporter
+    # Figure 21(h) — capital per non-exporter
     Kd_init_per_dom = K_d_initial[1] / domestic_pop_initial[1]
     Kdcorr_open_a    = K_d_open_CM_open_trade[1]/domestic_pop_open_CM_open_trade[1] * domestic_pop_store_open_CM_open_trade_asym[1,end-1] / (K_d_ratio_store_open_CM_open_trade_asym[1,end] * capital_supply_future_open_CM_open_trade_asym[1,end])
     Kdcorr_closed_a  = K_d_closed_CM_open_trade[1]/domestic_pop_closed_CM_open_trade[1] * domestic_pop_store_closed_CM_open_trade_asym[1,end-1] / (K_d_ratio_store_closed_CM_open_trade_asym[1,end] * capital_supply_future_closed_CM_open_trade_asym[1,end])
@@ -3854,20 +3899,20 @@ let
     plot([range(1991,2020)], [Kd_smooth_open_a, Kd_smooth_closed_a, Kd_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[-20.0,20])
-    savefig("../Figures/Figure12h_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12h_asym.pdf")
+    savefig("../Figures/Figure21h_capital_per_nonexporter.pdf")
+    println("[Figure 21] Saved Figure21h_capital_per_nonexporter.pdf")
 
-    # Figure12i_asym — capital share of exporters
+    # Figure 21(i) — capital share of exporters
     Kshare_open_a    = movmean(100 .* K_x_ratio_store_open_CM_open_trade_asym[1,1:end], 5)
     Kshare_closed_a  = movmean(100 .* K_x_ratio_store_closed_CM_open_trade_asym[1,1:end], 5)
     Kshare_delayed_a = movmean(100 .* K_x_ratio_store_open_CMdelayed_open_trade_asym[1,1:end], 5)
     plot([range(1991,2020)], [Kshare_open_a, Kshare_closed_a, Kshare_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[30,80])
-    savefig("../Figures/Figure12i_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12i_asym.pdf")
+    savefig("../Figures/Figure21i_capital_share_of_exporters.pdf")
+    println("[Figure 21] Saved Figure21i_capital_share_of_exporters.pdf")
 
-    # Figure12l_asym — s.d. ARPK domestic
+    # Figure 21(k) — s.d. ARPK domestic
     sdMRPKd_corr_open_a    = sd_MRPK_d_open_CM_open_trade[1] / sd_MRPK_d_store_open_CM_open_trade_asym[1,end]
     sdMRPKd_corr_closed_a  = sd_MRPK_d_closed_CM_open_trade[1] / sd_MRPK_d_store_closed_CM_open_trade_asym[1,end]
     sdMRPKd_corr_delayed_a = sd_MRPK_d_open_CM_open_trade[1] / sd_MRPK_d_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3877,10 +3922,10 @@ let
     plot([range(1991,2020)], [sdMRPKd_smooth_open_a, sdMRPKd_smooth_closed_a, sdMRPKd_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.32,0.55])
-    savefig("../Figures/Figure12l_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12l_asym.pdf")
+    savefig("../Figures/Figure21k_nonexporter_sd_ARPK.pdf")
+    println("[Figure 21] Saved Figure21k_nonexporter_sd_ARPK.pdf")
 
-    # Figure12m_asym — s.d. ARPK exporter
+    # Figure 21(l) — s.d. ARPK exporter
     sdMRPKx_corr_open_a    = sd_MRPK_x_open_CM_open_trade[1] / sd_MRPK_x_store_open_CM_open_trade_asym[1,end]
     sdMRPKx_corr_closed_a  = sd_MRPK_x_closed_CM_open_trade[1] / sd_MRPK_x_store_closed_CM_open_trade_asym[1,end]
     sdMRPKx_corr_delayed_a = sd_MRPK_x_open_CM_open_trade[1] / sd_MRPK_x_store_open_CMdelayed_open_trade_asym[1,end-1]
@@ -3891,35 +3936,36 @@ let
     plot([range(1991,2020)], [sdMRPKx_smooth_open_a, sdMRPKx_smooth_closed_a, sdMRPKd_smooth_delayed_a],
          legend=nothing, linewidth=5, linestyle=[:solid :dash :dot], grid=false,
          tickfontsize=14, ylims=[0.25,0.55])
-    savefig("../Figures/Figure12m_asym.pdf")
-    println("[fig:Figure12_asym] Saved Figure12m_asym.pdf")
+    savefig("../Figures/Figure21l_exporter_sd_ARPK.pdf")
+    println("[Figure 21] Saved Figure21l_exporter_sd_ARPK.pdf")
 end
 
-println("\n=== figures_tables.jl: completed sections ===")
-println("  [fig:Figure1]                  Figure1.tikz (foreign credit, imports, tariffs)")
-println("  [table:Table1]                 table_1_results  (8×3)")
-println("  [table:Table2]                 table_2_results  (6×2)")
-println("  [fig:Figure4]                  Figure4a.pdf, Figure4b.pdf")
-println("  [table:Table4]                 table_4_results  (20×6)")
-println("  [table:Table5]                 table_5_results  (22×5) + table_6_results (4×3)")
-println("  [table:Table_regs]             BL + FC GLM regressions")
-println("  [table:cap_market_basis]       table_9b (20×2), table_5b (14×2), table_6b (4×3)")
-println("  [tab:calibration_fixed_cost]   table_1_results_FC (8×4)")
-println("  [tab:nontargeted_fixed_cost]   table_3_results_FC (14×3)")
-println("  [tab:results_fixed_cost]       table_4_results_FC (20×6)")
-println("  [tab:results_fixed_cost_micro] table_5_results_FC (22×5)")
-println("  [fig:combined_changes]         Figure5a, 5b, 6a, 6b, 7a, 7b")
-println("  [fig:Figure_CMI_only]          Figure5c, 6c, 7c")
-println("  [fig:Figure12]                 Figure12a–m (skip j)")
-println("  [fig:Figure12c]                Figure12q, Figure12r  (DiD simulation)")
-println("  [fig:Figure12b]                Figure12n, Figure12o, Figure12p")
-println("  [fig:welfare]                  Figure9a, 9b, 10a, 10b, 11a, 11c")
-println("  [table:Table8]                 Welfare change (17-row computed table)")
-println("  [table:Table9]                 Standalone CM integration (computed)")
-println("  [table:combined]               Financial development Table10 + Table11 (computed)")
-println("  [table:Table4b]                Core economy effects (computed)")
-println("  [table:Table_asym]             Asymmetric vs symmetric welfare (computed)")
-println("  [fig:Figure12_cons]            Figure12c + Figure12c_asym")
-println("  [fig:Figure12_TFP]             Figure12a + Figure12a_asym")
-println("  [fig:Figure12_ARPK]            Figure12k + Figure12k_asym")
-println("  [fig:Figure12_asym]            Figure12b/d/e/f/g/h/i/l/m_asym")
+println("\n=== figures_tables.jl: completed sections (paper numbering) ===")
+println("  [Figure 1]   Figures/Figure1.tikz (foreign credit, imports, tariffs)")
+println("  [Figure 3]   Figures/Figure3a_*.pdf, Figure3b_*.pdf")
+println("  [Figure 4]   Figures/Figure4a_*.pdf ... Figure4c_*.pdf")
+println("  [Figure 5]   Figures/Figure5a_*.pdf ... Figure5l_*.pdf")
+println("  [Figure 6]   Figures/Figure6a_*.pdf, Figure6b_*.pdf  (DiD simulation)")
+println("  [Figure 15]  Figures/Figure15_*.pdf  (6 panels)")
+println("  [Figure 16]  Figures/Figure16_*.pdf  (6 panels)")
+println("  [Figure 17]  Figures/Figure17a_*.pdf ... Figure17c_*.pdf")
+println("  [Figure 18]  Figures/Figure18a_*.pdf (copy of 5a), Figure18b_*.pdf")
+println("  [Figure 19]  Figures/Figure19a_*.pdf (copy of 5b), Figure19b_*.pdf")
+println("  [Figure 20]  Figures/Figure20a_*.pdf (copy of 5j), Figure20b_*.pdf")
+println("  [Figure 21]  Figures/Figure21a_*.pdf ... Figure21l_*.pdf  (a, b, j copied from 18b, 19b, 20b)")
+println("  [Table 2]    Tables/Table2.tex   calibrated parameters and moments")
+println("  [Table 3]    Tables/Table3.tex   preassigned parameters")
+println("  [Table 4]    Tables/Table4.tex   BL + FC GLM regressions")
+println("  [Table 5]    Tables/Table5.tex   trade liberalization, aggregates")
+println("  [Table 6]    Tables/Table6.tex   trade liberalization, firms")
+println("  [Table 15]   Tables/Table15.tex  CM integration from trade-open economy")
+println("  [Table 16]   Tables/Table16.tex  FC calibration")
+println("  [Table 17]   Tables/Table17.tex  FC non-targeted moments")
+println("  [Table 18]   Tables/Table18.tex  FC reforms, aggregates")
+println("  [Table 19]   Tables/Table19.tex  FC reforms, firms")
+println("  [Table 20]   Tables/Table20.tex  standalone CM integration")
+println("  [Table 21]   Tables/Table21.tex  majority voting")
+println("  [Table 22]   Tables/Table22.tex  welfare change")
+println("  [Table 23]   Tables/Table23.tex  financial development (two panels)")
+println("  [Table 24]   Tables/Table24.tex  Core economy effects")
+println("  [Table 25]   Tables/Table25.tex  asymmetric vs symmetric welfare")

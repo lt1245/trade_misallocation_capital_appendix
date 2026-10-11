@@ -37,10 +37,11 @@
 #
 # Because the environment is anchored to this file's own directory via
 # @__DIR__, activating and instantiating it does not depend on the working
-# directory Julia was launched from. Reading and writing data still does: the
-# scripts reach the sibling Data, Tables, Figures and Transition_files folders
-# through relative paths such as "../Figures/Figure1.tikz", so Julia must be
-# started from this Model folder.
+# directory Julia was launched from. The scripts reach the sibling Data,
+# Tables, Figures and Transition_files folders through relative paths such as
+# "../Figures/Figure1.tikz", so this file also changes the working directory
+# to this Model folder (see the end of the file); Julia can therefore be
+# started from any directory.
 #
 # Idempotent: repeat includes are no-ops, so the cost is paid once per session.
 # =============================================================================
@@ -197,3 +198,11 @@ if !isdefined(Main, :REPLICATION_ENV_READY)
 
     @eval Main REPLICATION_ENV_READY = true
 end
+
+# The scripts read and write the sibling Data, Tables, Figures and
+# Transition_files folders through paths relative to the working directory
+# ("../Transition_files/...", "../Figures/..."). Anchor it to this Model folder
+# so the package runs however Julia was started, e.g. from an editor whose REPL
+# opens in the workspace folder. Outside the guard above so that every include
+# re-anchors it, and ahead of addprocs in code_new.jl so the workers start here.
+cd(@__DIR__)

@@ -82,108 +82,56 @@ using CSV
 end
 
 @everywhere begin
-# ============================================================================
-# Parameter_type
-# Central model parameter container. Holds every calibration value, grid
-# specification, function space, and pre-computed country-specific state-space
-# object used throughout the model.
-#
-# Occupation indices: 1 = worker, 2 = domestic producer, 3 = exporter.
-#
-# Fields
-# ------
-# country_no   : number of countries in the model
-# α            : capital share in production (Cobb-Douglas)
-# η            : span-of-control / decreasing-returns parameter
-# δ            : capital depreciation rate
-# σ            : elasticity of substitution across firm varieties
-# α₁, α₂      : effective capital and labor shares (= α·η and (1-α)·η)
-# α₁_eff,α₂_eff: markup-adjusted shares used in distorted optimality conditions
-# L            : (country_no,) labour endowments
-# openness     : 0 = closed, 1 = open capital markets
-# β            : (country_no,) discount factors
-# ω            : home bias in the final-good aggregator
-# θ            : (country_no,) max leverage (1-θ = minimum equity ratio)
-# banking_cost : (country_no,) intermediation wedge between saving and lending rate
-# Avg_prod     : (country_no,) unconditional mean of log-productivity process
-# ρ            : (country_no,) AR(1) persistence of productivity shock
-# σₛ           : (country_no,) standard deviation of productivity innovation
-# κ            : scaling factor applied to all fixed / entry costs
-# FM, FMₓ      : per-period maintenance costs for domestic / export sector
-# F, Fₓ        : one-time entry costs for domestic / export sector
-# Exit, Exitₓ  : exit costs (currently unused, set to zero)
-# Improv,Improvₓ: productivity improvement upon entry (currently unused)
-# iid_cost_value: grid for the iid component of entry cost draws
-# iid_cost_prob : associated probabilities
-# n            : [n_a, n_z] grid sizes for the VFI approximation
-# n_fine       : [n_a_fine, n_z] grid sizes for the distribution simulation
-# agrid        : asset grid used in VFI
-# agrid_fine   : finer asset grid used for the stationary distribution
-# a_min        : borrowing constraint / lower bound of asset grid
-# a_max        : upper bound of asset grid
-# spliorder    : polynomial order for spline approximation of value function
-# fspace_a     : BasisMatrices function space for VFI asset dimension
-# fspace_a_fine: BasisMatrices function space for distribution asset dimension
-# τ            : (country_no,) iceberg export trade cost
-# Country_spec_p: StructArray of country-specific state-space objects
-# bounds       : (4,2) matrix of [lower, upper] bounds on [W, r, Y, P_final]
-#                used to flag price guesses outside the feasible region
-# ============================================================================
 mutable struct Parameter_type
-    country_no::Int64 #number of countries
-    α::Float64 # capital share
-    η::Float64 # decreasing returns
-    δ::Float64 # Depreciation rate
-    σ::Float64 # Elasticity of substitution
-    α₁::Float64 # shortcut for the C-D functions, effective capital share
-    α₂::Float64 # shortcut for the C-D functions, effective labor share
-    α₁_eff::Float64 # shortcut for the C-D functions, markup adjusted capital share
-    α₂_eff::Float64 # shortcut for the C-D functions, markup adjusted labor share
-    L::Array{Float64,1} # size of the economies
-    openness::Int # 0: closed capital markets, 1: open capital markets
-    β::Array{Float64,1} # Discount factor for each countries
-    ω::Float64 # Home bias in final goods
-    θ::Array{Float64,1} # financial development - max leverage constraint
-    banking_cost::Array{Float64,1} # banking friction, wedge between the savings and lending rate -unused
-    Avg_prod::Array{Float64,1} # Productivity shifter
-    ρ::Array{Float64,1} # autoregressive part of the transitory productivity shock
-    σₛ::Array{Float64,1} # Standard deviation of the transitory productivity shock
-    κ::Float64 # Scaled entry cost
-    FM::Array{Float64,1} #  Maintenance cost of the domestic sector
-    FMₓ::Array{Float64,1} #  Maintenance cost of the export sector
-    F::Array{Float64,1} #  Entry cost to the domestic sector
-    Fₓ::Array{Float64,1} #  Entry cost to the export sector
-    Exit::Array{Float64,1} #  Exit cost from the domestic sector  -unused
-    Exitₓ::Array{Float64,1} #  Exit cost from the export sector  -unused
-    Improv::Float64 # Productivity improvement in the domestic sector -unused
-    Improvₓ::Float64 # Productivity improvement in the domestic sector -unused
-    iid_cost_value::Array{Float64,1} #  grid for the iid entry cost into the production sector
-    iid_cost_prob::Array{Float64,1} #  probabilities for the iid entry cost into the production sector
-    n::Array{Int64,1} # joint approximation number of gridpoints for 1) assets and 2) productivity
-    n_fine::Array{Int64,1} # joint simulation number of gridpoints for 1) assets and 2) productivity
-    agrid::Array{Float64,1} # joint approximation number of gridpoints for 1) assets and 2) productivity
-    agrid_fine::Array{Float64,1} # joint simulation number of gridpoints for 1) assets and 2) productivity
-    a_min::Float64 # Lower bound for the asset grid/ borrowing constraint
-    a_max::Float64 # Upper bound for the asset grid
-    spliorder::Int64 # Order of the spline approximation
-    fspace_a::Dict{Symbol,Any} # function space for the approximation of the value function
-    fspace_a_fine::Dict{Symbol,Any} # function space for the approximation of the distribution
-    τ::Array{Float64,1} # Value added export variable cost rate
-# Country specific processes:
-    Country_spec_p
-# This stores the following objects
-    #s: matrix of states, with the first column for assets, second for productivity
-    #ns: total number of states, taken as a cartesian product of "s"
-    #s_fine: matrix of states for the distribution, with the first column for assets, second for productivity
-    #ns_fine: total number of states for the distribution, taken as a cartesian product of "s_fine"
-    #Phi_z: basis matrix for the productivity
-    #Phi_z_fine: basis matrix for the productivity in the distribution
-    #Phi joint basis matrix
-    #Phi_aug joint basis matrix with occupation choice
-    #P_kron,P_kron1,P_kron_fine, are useful object for the distribution
-    #exp_egrid is the grid of productivities
-# Optimization bounds:
-    bounds::Array{Float64,2}
+    # Central model parameter container: every calibration value, grid
+    # specification, function space and pre-computed country-specific
+    # state-space object used throughout the model. Fields marked (country_no,)
+    # hold one entry per country: 1 = NMS, 2 = Core.
+    # Occupation indices: 1 = worker, 2 = domestic producer, 3 = exporter.
+    country_no::Int64                # number of countries in the model
+    α::Float64                       # capital share in production (Cobb-Douglas)
+    η::Float64                       # span of control (decreasing returns to scale)
+    δ::Float64                       # capital depreciation rate
+    σ::Float64                       # elasticity of substitution across firm varieties
+    α₁::Float64                      # effective capital share, α·η
+    α₂::Float64                      # effective labor share, (1-α)·η
+    α₁_eff::Float64                  # markup-adjusted capital share, α₁·(σ-1)/σ
+    α₂_eff::Float64                  # markup-adjusted labor share, α₂·(σ-1)/σ
+    L::Array{Float64,1}              # (country_no,) labor endowment, i.e. size of each economy
+    openness::Int                    # capital markets: 0 = closed, 1 = open (integrated)
+    β::Array{Float64,1}              # (country_no,) discount factor
+    ω::Float64                       # home bias in the final-good aggregator
+    θ::Array{Float64,1}              # (country_no,) borrowing tightness: k ≤ a/(1-θ), so 1-θ is the minimum equity share
+    banking_cost::Array{Float64,1}   # (country_no,) wedge between the saving and lending rate; zero in the calibration
+    Avg_prod::Array{Float64,1}       # (country_no,) productivity shifter: unconditional mean of the productivity process
+    ρ::Array{Float64,1}              # (country_no,) AR(1) persistence of the transitory productivity shock
+    σₛ::Array{Float64,1}             # (country_no,) standard deviation of the transitory productivity shock
+    κ::Float64                       # scaling factor for the maintenance and exit costs (FM, FMₓ, Exit, Exitₓ)
+    FM::Array{Float64,1}             # (country_no,) per-period maintenance cost, domestic sector; zero in the calibration
+    FMₓ::Array{Float64,1}            # (country_no,) per-period maintenance cost, export sector; zero in the baseline,
+                                     #   positive for NMS in the fixed-cost model (fixed_cost_steady_states.jl)
+    F::Array{Float64,1}              # (country_no,) one-time entry cost, domestic sector
+    Fₓ::Array{Float64,1}             # (country_no,) one-time entry cost, export sector
+    Exit::Array{Float64,1}           # (country_no,) exit cost, domestic sector; zero in the calibration
+    Exitₓ::Array{Float64,1}          # (country_no,) exit cost, export sector; zero in the calibration
+    Improv::Float64                  # productivity improvement on entry, domestic sector; unused
+    Improvₓ::Float64                 # productivity improvement on entry, export sector; unused
+    iid_cost_value::Array{Float64,1} # grid of the iid component of the cost of entering production
+    iid_cost_prob::Array{Float64,1}  # probabilities of the iid_cost_value grid points
+    n::Array{Int64,1}                # [n_a, n_z]: asset and productivity grid sizes for the value function
+    n_fine::Array{Int64,1}           # [n_a_fine, n_z]: asset and productivity grid sizes for the distribution
+    agrid::Array{Float64,1}          # asset grid for the value function
+    agrid_fine::Array{Float64,1}     # finer asset grid for the stationary distribution
+    a_min::Float64                   # lower bound of the asset grid (borrowing constraint)
+    a_max::Float64                   # upper bound of the asset grid
+    spliorder::Int64                 # order of the spline approximation of the value function
+    fspace_a::Dict{Symbol,Any}       # BasisMatrices function space, asset dimension of the value function
+    fspace_a_fine::Dict{Symbol,Any}  # BasisMatrices function space, asset dimension of the distribution
+    τ::Array{Float64,1}              # (country_no,) variable (iceberg) export cost: 1+τ units are shipped per unit delivered
+    Country_spec_p                   # StructArray over countries of the state-space objects built by
+                                     #   setup_state_space (grids, basis and Kronecker transition matrices)
+    bounds::Array{Float64,2}         # (4,2) [lower upper] bounds on wage, interest rate, output and final-good
+                                     #   price, used to flag price guesses outside the feasible region
 end
 #Redefine copy to allow for this in the parameter types.
 Base.copy(x::T) where T = T([deepcopy(getfield(x, k)) for k ∈ fieldnames(T)]...)
